@@ -9,6 +9,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://sculptor-freebee-babbling.ngrok-free.dev"
+   
   ],
 }));
 app.use(express.json());
