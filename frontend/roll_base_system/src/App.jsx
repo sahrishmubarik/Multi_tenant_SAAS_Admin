@@ -11,6 +11,8 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
 import CreateWorkspace from "./pages/workspace.jsx";
 import MyWorkspace from "./pages/MyWorkspace.jsx";
+import Members from "./pages/Members.jsx";
+import AcceptInvitation from "./pages/AcceptInvitation";
 function App() {
   return (
     <BrowserRouter>
@@ -28,13 +30,13 @@ function App() {
 
           <Route path="workspace" element={<MyWorkspace />} />
 
-          {/* <Route path="members" element={<Members />} />
+           <Route path="members" element={<Members/>} />
 
-          <Route path="activity" element={<Activity />} /> */}
+          {/* <Route path="activity" element={<Activity />} /> */}
 
           <Route path="create-workspace" element={<CreateWorkspace />}/>
         </Route>
-        
+        <Route path="/accept-invitation" element={<AcceptInvitation />}/>
          {/* <Route path="/profile" element={<Profile/>}/>
          <Route path="/create-workspace" element={<CreateWorkspace/>}/>
          <Route path="/my-workspace" element={<MyWorkspace/>}/> */}

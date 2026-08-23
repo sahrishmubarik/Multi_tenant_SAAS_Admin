@@ -31,7 +31,7 @@ export default function MyWorkspace() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const data = await response.json();
@@ -41,14 +41,20 @@ export default function MyWorkspace() {
           setMessageType("error");
           return;
         }
+        const savedWorkspaceId = localStorage.getItem("workspaceId");
 
-        const currentWorkspace = data.workspaces?.[0];
+        const currentWorkspace =
+          data.workspaces?.find(
+            (workspace) => workspace.workspaceId === savedWorkspaceId,
+          ) || data.workspaces?.[0];
 
         if (!currentWorkspace) {
           setMessage("No workspace found.");
           setMessageType("error");
           return;
         }
+
+        localStorage.setItem("workspaceId", currentWorkspace.workspaceId);
 
         setWorkspace(currentWorkspace);
 
@@ -68,7 +74,7 @@ export default function MyWorkspace() {
     getWorkspace();
   }, []);
 
- /* admin get */
+  /* admin get */
   useEffect(() => {
     async function getAdmins() {
       if (!workspace?.workspaceId) {
@@ -90,7 +96,7 @@ export default function MyWorkspace() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         const data = await response.json();
@@ -103,7 +109,7 @@ export default function MyWorkspace() {
 
         // Only admins can become owner
         const adminMembers = data.member?.filter(
-          (member) => member.role === "admin"
+          (member) => member.role === "admin",
         );
 
         setAdmins(adminMembers || []);
@@ -118,7 +124,6 @@ export default function MyWorkspace() {
     getAdmins();
   }, [workspace]);
 
-
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -131,7 +136,7 @@ export default function MyWorkspace() {
     setMessageType("");
   }
 
-/* update workspace name */
+  /* update workspace name */
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -163,7 +168,7 @@ export default function MyWorkspace() {
           body: JSON.stringify({
             workspaceName: formData.workspaceName,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -174,9 +179,7 @@ export default function MyWorkspace() {
         return;
       }
 
-      setMessage(
-        data.message || "Workspace name changed successfully."
-      );
+      setMessage(data.message || "Workspace name changed successfully.");
 
       setMessageType("success");
 
@@ -193,7 +196,7 @@ export default function MyWorkspace() {
       setSaving(false);
     }
   }
-/* TRANSFER OWNERSHIP */
+  /* TRANSFER OWNERSHIP */
   async function handleTransferOwnership(event) {
     event.preventDefault();
 
@@ -207,12 +210,10 @@ export default function MyWorkspace() {
       return;
     }
 
-    const selectedAdmin = admins.find(
-      (admin) => admin.userId === newOwnerId
-    );
+    const selectedAdmin = admins.find((admin) => admin.userId === newOwnerId);
 
     const confirmed = window.confirm(
-      `Are you sure you want to transfer ownership to ${selectedAdmin?.memberName}?`
+      `Are you sure you want to transfer ownership to ${selectedAdmin?.memberName}?`,
     );
 
     if (!confirmed) {
@@ -237,22 +238,18 @@ export default function MyWorkspace() {
             workspaceId: workspace.workspaceId,
             newOwnerId: newOwnerId,
           }),
-        }
+        },
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(
-          data.message || "Failed to transfer ownership."
-        );
+        setMessage(data.message || "Failed to transfer ownership.");
         setMessageType("error");
         return;
       }
 
-      setMessage(
-        data.message || "Ownership transferred successfully."
-      );
+      setMessage(data.message || "Ownership transferred successfully.");
 
       setMessageType("success");
 
@@ -277,14 +274,14 @@ export default function MyWorkspace() {
     }
   }
 
-/* Delete workspace */
+  /* Delete workspace */
   async function handleDeleteWorkspace() {
     if (workspace?.role !== "owner") {
       return;
     }
 
     const confirmed = window.confirm(
-      "Are you sure you want to delete this workspace? This action cannot be undone."
+      "Are you sure you want to delete this workspace? This action cannot be undone.",
     );
 
     if (!confirmed) {
@@ -297,19 +294,16 @@ export default function MyWorkspace() {
     setMessage("");
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/v1/workspace",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            workspaceId: workspace.workspaceId,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/v1/workspace", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          workspaceId: workspace.workspaceId,
+        }),
+      });
 
       const data = await response.json();
 
@@ -319,9 +313,7 @@ export default function MyWorkspace() {
         return;
       }
 
-      setMessage(
-        data.message || "Workspace deleted successfully."
-      );
+      setMessage(data.message || "Workspace deleted successfully.");
 
       setMessageType("success");
 
@@ -341,82 +333,76 @@ export default function MyWorkspace() {
 
   /* leave workspace */
   async function handleLeaveWorkspace() {
-  if (workspace?.role === "owner") {
-    setMessage(
-      "Workspace owner cannot leave. Transfer ownership first."
-    );
-    setMessageType("error");
-    return;
-  }
-
-  const confirmed = window.confirm(
-    "Are you sure you want to leave this workspace?"
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  const token = localStorage.getItem("token");
-  const workspaceId = workspace?.workspaceId;
-
-  if (!workspaceId) {
-    setMessage("Workspace not found.");
-    setMessageType("error");
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `http://localhost:3000/api/v1/workspace/leave/${workspaceId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setMessage(data.message || "Failed to leave workspace.");
+    if (workspace?.role === "owner") {
+      setMessage("Workspace owner cannot leave. Transfer ownership first.");
       setMessageType("error");
       return;
     }
 
-    setMessage(
-      data.message || "You have left the workspace successfully."
+    const confirmed = window.confirm(
+      "Are you sure you want to leave this workspace?",
     );
-    setMessageType("success");
 
-    // Remove workspace from current page
-    setWorkspace(null);
+    if (!confirmed) {
+      return;
+    }
 
-    setFormData({
-      workspaceName: "",
-    });
-  } catch (error) {
-    console.error("Leave workspace error:", error);
+    const token = localStorage.getItem("token");
+    const workspaceId = workspace?.workspaceId;
 
-    setMessage("Something went wrong.");
-    setMessageType("error");
+    if (!workspaceId) {
+      setMessage("Workspace not found.");
+      setMessageType("error");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/v1/workspace/leave/${workspaceId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(data.message || "Failed to leave workspace.");
+        setMessageType("error");
+        return;
+      }
+
+      setMessage(data.message || "You have left the workspace successfully.");
+      setMessageType("success");
+
+      // Remove workspace from current page
+      setWorkspace(null);
+
+      setFormData({
+        workspaceName: "",
+      });
+    } catch (error) {
+      console.error("Leave workspace error:", error);
+
+      setMessage("Something went wrong.");
+      setMessageType("error");
+    }
   }
-}
 
   if (loading) {
     return (
       <main className="min-h-screen bg-[#f4f7f4] px-6 py-10">
         <div className="mx-auto max-w-[825px]">
-          <p className="text-sm text-[#66686d]">
-            Loading workspace...
-          </p>
+          <p className="text-sm text-[#66686d]">Loading workspace...</p>
         </div>
       </main>
     );
   }
 
- /* have not workspace */
+  /* have not workspace */
   if (!workspace) {
     return (
       <main className="min-h-screen bg-[#f4f7f4] px-6 py-10">
@@ -436,7 +422,6 @@ export default function MyWorkspace() {
     <main className="bg-[#E5EEE4]">
       <div className="min-h-screen bg-[#f4f7f4] px-6 py-10 sm:px-8">
         <div className="mx-auto w-full max-w-[825px]">
-
           {/* Workspace Header */}
 
           <div className="border-b border-[#e5e5e5] pb-7">
@@ -479,7 +464,6 @@ export default function MyWorkspace() {
 
               <div className="mt-8 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
                 <form onSubmit={handleSubmit}>
-
                   <div className="border-b border-[#e7e7e5] px-5 py-4">
                     <h2 className="text-[15px] font-semibold text-[#17181a]">
                       Workspace name
@@ -547,10 +531,7 @@ export default function MyWorkspace() {
                   </p>
                 </div>
 
-                <form
-                  onSubmit={handleTransferOwnership}
-                  className="px-5 py-5"
-                >
+                <form onSubmit={handleTransferOwnership} className="px-5 py-5">
                   <label
                     htmlFor="newOwner"
                     className="mb-2 block text-[13px] font-medium text-[#252629]"
@@ -580,15 +561,10 @@ export default function MyWorkspace() {
                       focus:ring-[#eeeeec]
                     "
                   >
-                    <option value="">
-                      Select an admin
-                    </option>
+                    <option value="">Select an admin</option>
 
                     {admins.map((admin) => (
-                      <option
-                        key={admin.userId}
-                        value={admin.userId}
-                      >
+                      <option key={admin.userId} value={admin.userId}>
                         {admin.memberName} — Admin
                       </option>
                     ))}
@@ -603,9 +579,7 @@ export default function MyWorkspace() {
                   <div className="mt-4 flex justify-end">
                     <button
                       type="submit"
-                      disabled={
-                        transferring || !newOwnerId
-                      }
+                      disabled={transferring || !newOwnerId}
                       className="
                         rounded-[9px]
                         border
@@ -621,9 +595,7 @@ export default function MyWorkspace() {
                         disabled:opacity-60
                       "
                     >
-                      {transferring
-                        ? "Transferring..."
-                        : "Transfer ownership"}
+                      {transferring ? "Transferring..." : "Transfer ownership"}
                     </button>
                   </div>
                 </form>
@@ -678,7 +650,6 @@ export default function MyWorkspace() {
           {!isOwner && (
             <div className="mt-8 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
               <div className="px-5 py-5">
-
                 <p className="text-[11px] font-semibold tracking-[0.18em] text-[#6f7177]">
                   YOUR WORKSPACE
                 </p>
@@ -688,8 +659,8 @@ export default function MyWorkspace() {
                 </h2>
 
                 <p className="mt-2 text-[13px] leading-5 text-[#66686d]">
-                  You are a member of this workspace. Only the workspace
-                  owner can change workspace settings.
+                  You are a member of this workspace. Only the workspace owner
+                  can change workspace settings.
                 </p>
 
                 <div className="mt-5 flex justify-end">
