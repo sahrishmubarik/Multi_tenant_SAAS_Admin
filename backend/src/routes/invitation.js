@@ -2,6 +2,8 @@ import express from "express";
 
 import { ownerOrAdminMiddleware } from "#middleware/ownerOrAdmin.js";
 import { ownerMiddleware } from "#middleware/owner.js";
+import { authMiddleware } from "#middleware/auth.js";
+
 import { createInvitation } from "#controllers/invitation.js";
 import {
   acceptInvitation,
@@ -9,27 +11,29 @@ import {
 } from "#controllers/acceptInvitation.js";
 
 import { checkInvitationStatus } from "#controllers/checkStatus.js";
+import {getInvitationDetails } from "#controllers/checkInvitation.js";
 
 const invitation = express.Router();
 
-invitation.post("/", ownerOrAdminMiddleware, createInvitation);
 
-invitation.post("/accept", acceptInvitation);
+// Admin/Owner
+invitation.post( "/:workspaceId", ownerOrAdminMiddleware, createInvitation);
 
-invitation.post("/revoke", revokeInvitation);
 
-invitation.get("/status", ownerMiddleware, (req, res, next) => {
-  const { status } = req.query;
 
-  if (!status) {
-    return res.status(400).json({
-      error: "Query parameter 'status' is required",
-    });
-  }
+invitation.get("/details",getInvitationDetails);
 
-  req.params.status = status;
 
-  return checkInvitationStatus(req, res, next);
-});
+// LOGGED-IN USER
+// User invitation accept 
+invitation.post("/accept",authMiddleware,acceptInvitation);
+
+
+// Admin/Owner
+invitation.post( "/revoke", authMiddleware, revokeInvitation);
+
+
+// Owner
+invitation.get( "/status/:workspaceId", ownerMiddleware, checkInvitationStatus);
 
 export default invitation;
