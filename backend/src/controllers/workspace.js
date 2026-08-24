@@ -56,20 +56,30 @@ export async function workspaceCreate(req, res) {
       role: "owner",
       assignedBy: createdBy,
     });
+      const [performedUser] = await db
+      .select({
+        name: users.name,
+      })
+      .from(users)
+      .where(eq(users.id, req.user.id));
+             // Create audit log ONLY after successful update
+  
+    /* audit log activity */
+  const auditResult= await createAuditLog({
+  performedBy: createdBy,
+  action: "Create workspace",
+  affectedUser: null,
+  message: `${performedUser.name}created a workspace .`,
+});
 
-    const auditResult = await createAuditLog({
-      performedBy: createdBy,
-      action: "Create workspace",
-      affectedUser: null,
-    });
-
+   
     return res.status(201).json({
       success: true,
       message: `${workspaceName} Workspace is successfully created`,
       workspaceId: newWorkspace.id,
       role: "owner",
       workspace: newWorkspace,
-      audit: auditResult.message,
+      audit: auditResult,
     });
   } catch (error) {
     console.log("Workspace Error:", error);

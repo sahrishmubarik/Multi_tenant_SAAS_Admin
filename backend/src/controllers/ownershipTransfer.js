@@ -110,6 +110,22 @@ export const transferWorkspaceOwnership = async (req, res) => {
       action: "Transfer ownership",
       affectedUser: newOwnerId,
     });
+      const [performedUser] = await db
+          .select({
+            name: users.name,
+          })
+          .from(users)
+          .where(eq(users.id, req.user.id));
+                 // Create audit log ONLY after successful update
+      
+        /* audit log activity */
+      const auditLog= await createAuditLog({
+      performedBy: currentOwnerId,
+      action: "Transfer ownership",
+      affectedUser: newOwnerId,
+      message: `${performedUser.name} transfer ownership .`,
+    });
+    
 
     return res.status(200).json({
       success: true,
@@ -119,7 +135,7 @@ export const transferWorkspaceOwnership = async (req, res) => {
         newOwnerId,
         workspaceId,
       },
-      audit: auditResult.message,
+      audit: auditResult,
     });
   } catch (error) {
     console.error("Transfer ownership error:", error);
