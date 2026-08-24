@@ -11,7 +11,7 @@ import {
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   const [workspaces, setWorkspaces] = useState([]);
@@ -27,9 +27,7 @@ export default function Sidebar() {
     navigate("/login", { replace: true });
   };
 
-  /* =========================================
-     GET USER WORKSPACES
-  ========================================= */
+ /* get user workspace */
 
   useEffect(() => {
     async function getWorkspaces() {
@@ -65,9 +63,7 @@ export default function Sidebar() {
           return;
         }
 
-        /* =========================================
-           GET PREVIOUSLY SELECTED WORKSPACE
-        ========================================= */
+         /*get workspace  */
 
         const savedWorkspaceId =
           localStorage.getItem("workspaceId");
@@ -77,16 +73,12 @@ export default function Sidebar() {
             workspace.workspaceId === savedWorkspaceId
         );
 
-        /* =========================================
-           IF SAVED WORKSPACE EXISTS
-        ========================================= */
+        /* =if save exist workspace */
 
         if (savedWorkspace) {
           setSelectedWorkspace(savedWorkspace);
         } else {
-          /* =========================================
-             OTHERWISE SELECT FIRST WORKSPACE
-          ========================================= */
+          /*select first workspace*/
 
           const firstWorkspace = workspaceList[0];
 
@@ -110,9 +102,7 @@ export default function Sidebar() {
     getWorkspaces();
   }, []);
 
-  /* =========================================
-     SELECT WORKSPACE
-  ========================================= */
+  /* select workspace*/
 
   function handleWorkspaceSelect(workspace) {
     setSelectedWorkspace(workspace);
@@ -139,7 +129,19 @@ export default function Sidebar() {
     }`;
 
   return (
-    <aside className="fixed left-0 top-0 z-50 flex h-screen w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-white">
+    <aside className={`fixed left-0 top-0 z-50 flex h-screen w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-white
+    transition-transform
+    duration-300
+    ease-in-out
+
+    ${
+      isOpen
+        ? "translate-x-0"
+        : "-translate-x-full"
+    }
+
+    md:translate-x-0
+  `}>
 
       {/* Logo */}
 
@@ -165,9 +167,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* =========================================
-          WORKSPACE SELECTOR
-      ========================================= */}
+      {/* WORKSPACE SELECTor */}
 
       <div className="relative px-4">
 
@@ -221,9 +221,7 @@ export default function Sidebar() {
 
         </button>
 
-        {/* =========================================
-            WORKSPACE DROPDOWN
-        ========================================= */}
+        {/* WORKSPACE DROPDOWN */}
 
         {workspaceOpen && (
           <div

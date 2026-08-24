@@ -23,7 +23,11 @@ export default function CreateWorkspace() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-
+    if(!formData.workspaceName){
+      setMessage("Workspace name is required");
+      return;
+    }
+    setMessage("");
     try {
       const token = localStorage.getItem("token");
 
@@ -125,7 +129,7 @@ export default function CreateWorkspace() {
                   focus:ring-2
                   focus:ring-[#eeeeec]
                 "
-                    required
+                
                   />
                 </div>
 
@@ -156,7 +160,7 @@ export default function CreateWorkspace() {
                   <div
                     className={`rounded-[9px] border px-3 py-2.5 text-[13px] ${
                       messageType === "error"
-                        ? "border-red-200 bg-red-50 text-red-600"
+                        ? "border-red-200 bg-red-50 text-[var(--color-danger)]"
                         : "border-green-200 bg-green-50 text-green-700"
                     }`}
                   >
