@@ -4,7 +4,7 @@ import { eq, and } from "drizzle-orm";
 
 export async function getMemberOnBaseOfRole(req, res) {
   const userId = req.user.id;
-  const { workspaceId } = req.body;
+  const { workspaceId } = req.params;
   const role = req.params.role;
 
   try {

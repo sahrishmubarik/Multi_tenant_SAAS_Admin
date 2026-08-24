@@ -1,5 +1,5 @@
 import { db } from '#config/client.js';
-import { workspaceMembers } from '#drizzle/schema.js';
+import { users, workspaceMembers } from '#drizzle/schema.js';
 import { eq } from 'drizzle-orm';
 import { createAuditLog } from '#controllers/auditLogs.js';
 
@@ -36,7 +36,8 @@ export async function changeRole(req, res) {
         memberId: workspaceMembers.id,
         userId: workspaceMembers.userId,
         workspaceId: workspaceMembers.workspaceId,
-        role: workspaceMembers.role
+        role: workspaceMembers.role,
+        memberName:workspaceMembers.memberName
       })
       .from(workspaceMembers)
       .where(eq(workspaceMembers.id, memberId));
@@ -71,12 +72,19 @@ export async function changeRole(req, res) {
         workspaceId: workspaceMembers.workspaceId,
         role: workspaceMembers.role
       });
+      const [performedUser] = await db
+  .select({
+    name: users.name,
+  })
+  .from(users)
+  .where(eq(users.id, req.user.id));
          // Create audit log ONLY after successful update
-    const auditResult = await createAuditLog({
-      performedBy: userId,
-      action: "Role Update",
-      affectedUser: targetMember.userId,
-    });
+   const auditResult = await createAuditLog({
+  performedBy: req.user.id,
+  action: "Role Update",
+  affectedUser: memberId,
+  message: `${performedUser.name} changed the role of ${targetMember.memberName}.`,
+});
 
     return res.status(200).json({
       message: "Member role updated successfully",

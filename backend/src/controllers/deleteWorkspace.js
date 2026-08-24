@@ -1,5 +1,5 @@
 import { db } from "#config/client.js";
-import {
+import { users,
   workspace,
   workspaceMembers,
   invitations,
@@ -55,16 +55,26 @@ export async function deleteWorkspace(req, res) {
     });
 
     // Audit log
-    const auditResult = await createAuditLog({
-      performedBy: userId,
-      action: "Delete workspace",
-      affectedUser: null,
-    });
-
+     const [performedUser] = await db
+         .select({
+           name: users.name,
+         })
+         .from(users)
+         .where(eq(users.id, req.user.id));
+                // Create audit log ONLY after successful update
+     
+       /* audit log activity */
+     const auditResult= await createAuditLog({
+     performedBy: req.user.id,
+     action: "Role Update",
+     affectedUser: member.userId,
+     message: `${performedUser.name} delete workspace .`,
+   });
+   
     return res.status(200).json({
       success: true,
       message: "Workspace deleted successfully",
-      audit: auditResult.message,
+      audit: auditResult,
     });
   } catch (error) {
     console.log("Delete Workspace Error:", error);

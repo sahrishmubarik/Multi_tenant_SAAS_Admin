@@ -26,9 +26,25 @@ export async function updateWorkspace(req, res) {
       .update(workspace)
       .set({ workspaceName: workspaceName })
       .where(eq(workspace.id, workspaceId));
-
+       const [performedUser] = await db
+           .select({
+             name: users.name,
+           })
+           .from(users)
+           .where(eq(users.id, req.user.id));
+                  // Create audit log ONLY after successful update
+       
+         /* audit log activity */
+       const auditResult= await createAuditLog({
+       performedBy: req.user.id,
+       action: "Update workspace name",
+       affectedUser: null,
+       message: `${performedUser.name} update the workspace name .`,
+     });
+     
     return res.status(200).json({
       message: `Workspace name updated to ${workspaceName} successfully`,
+      audit:auditResult
     });
   }
    catch (error) {
