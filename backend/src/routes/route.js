@@ -11,6 +11,6 @@ router.use("/auth", auth);
 router.use("/workspace", workspace);
 /* invitation */
 
-router.use("/workspace/invitation", invitation);
+router.use("/workspace-invitation", invitation);
 
 export default router;
