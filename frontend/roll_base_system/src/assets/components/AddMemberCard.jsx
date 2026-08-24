@@ -23,16 +23,22 @@ export default function AddMemberCard({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    if(!formData.memberName){
+      setError("Member Name is required");
+      return;
+    }
+    if(!formData.email){
+      setError("Member email is required");
+      return;
+    }
+    setError("");
     try {
       setLoading(true);
       setMessage("");
       setError("");
 
       const token = localStorage.getItem("token");
-     
-console.log("TOKEN:", token);
-console.log("WORKSPACE ID:", workspaceId);
+
       const response = await fetch(
         "http://localhost:3000/api/v1/workspace/member",
         {
@@ -45,7 +51,7 @@ console.log("WORKSPACE ID:", workspaceId);
             ...formData,
             workspaceId,
           }),
-        },
+        }
       );
 
       const data = await response.json();
@@ -63,8 +69,8 @@ console.log("WORKSPACE ID:", workspaceId);
       });
 
       onMemberAdded();
+
     } catch (error) {
-      // console.error("Add member error:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -73,6 +79,7 @@ console.log("WORKSPACE ID:", workspaceId);
 
   return (
     <div className="mt-8 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
+
       <div className="border-b border-[#e7e7e5] px-5 py-4">
         <h2 className="text-[15px] font-semibold text-[#17181a]">
           Add member
@@ -84,6 +91,8 @@ console.log("WORKSPACE ID:", workspaceId);
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5 px-5 py-5">
+
+        {/* Member Name */}
         <div>
           <label className="mb-2 block text-[13px] font-medium text-[#252629]">
             Member name
@@ -94,12 +103,12 @@ console.log("WORKSPACE ID:", workspaceId);
             type="text"
             value={formData.memberName}
             onChange={handleChange}
-            required
             placeholder="Enter member name"
             className="h-10 w-full rounded-[9px] border border-[#dfdfdb] bg-white px-3 text-[14px] text-[#252629] outline-none transition placeholder:text-[#aaa] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)]"
           />
         </div>
 
+        {/* Email */}
         <div>
           <label className="mb-2 block text-[13px] font-medium text-[#252629]">
             Email
@@ -110,12 +119,12 @@ console.log("WORKSPACE ID:", workspaceId);
             type="email"
             value={formData.email}
             onChange={handleChange}
-            required
             placeholder="member@example.com"
             className="h-10 w-full rounded-[9px] border border-[#dfdfdb] bg-white px-3 text-[14px] text-[#252629] outline-none transition placeholder:text-[#aaa] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)]"
           />
         </div>
 
+        {/* Initial Role */}
         <div>
           <label className="mb-2 block text-[13px] font-medium text-[#252629]">
             Role
@@ -133,18 +142,21 @@ console.log("WORKSPACE ID:", workspaceId);
           </select>
         </div>
 
+        {/* Error */}
         {error && (
           <div className="rounded-[8px] bg-[var(--color-danger-bg)] px-3 py-2 text-[12px] text-[var(--color-danger)]">
             {error}
           </div>
         )}
 
+        {/* Success */}
         {message && (
           <div className="rounded-[8px] bg-[var(--color-success-bg)] px-3 py-2 text-[12px] text-[var(--color-success)]">
             {message}
           </div>
         )}
 
+        {/* Submit */}
         <div className="flex justify-end">
           <button
             type="submit"
@@ -154,6 +166,7 @@ console.log("WORKSPACE ID:", workspaceId);
             {loading ? "Adding..." : "Add member"}
           </button>
         </div>
+
       </form>
     </div>
   );

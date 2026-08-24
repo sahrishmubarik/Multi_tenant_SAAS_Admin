@@ -4,14 +4,10 @@ import DeleteMemberModal from "./DeleteMemberModal";
 
 function RoleBadge({ role }) {
   const roleStyles = {
-    owner:
-      "bg-[var(--color-role-owner-bg)] text-[var(--color-role-owner)]",
-    admin:
-      "bg-[var(--color-role-admin-bg)] text-[var(--color-role-admin)]",
-    editor:
-      "bg-[var(--color-role-editor-bg)] text-[var(--color-role-editor)]",
-    viewer:
-      "bg-[var(--color-role-member-bg)] text-[var(--color-role-member)]",
+    owner: "bg-[var(--color-role-owner-bg)] text-[var(--color-role-owner)]",
+    admin: "bg-[var(--color-role-admin-bg)] text-[var(--color-role-admin)]",
+    editor: "bg-[var(--color-role-editor-bg)] text-[var(--color-role-editor)]",
+    viewer: "bg-[var(--color-role-member-bg)] text-[var(--color-role-member)]",
   };
 
   return (
@@ -53,8 +49,7 @@ export default function MembersList({
 
             {!loading && (
               <span className="rounded-full bg-[var(--color-surface-alt)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-text-secondary)]">
-                {members.length}{" "}
-                {members.length === 1 ? "member" : "members"}
+                {members.length} {members.length === 1 ? "member" : "members"}
               </span>
             )}
           </div>
@@ -175,6 +170,7 @@ export default function MembersList({
       {selectedMember && (
         <ChangeRoleModal
           member={selectedMember}
+          workspaceId={workspaceId}
           onClose={() => setSelectedMember(null)}
           onSuccess={() => {
             setSelectedMember(null);
