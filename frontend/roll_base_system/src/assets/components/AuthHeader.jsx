@@ -17,7 +17,7 @@ export default function AuthHeader() {
     </div>
 
     {/* Center Content */}
-    <div className="text-center">
+    <div className="hidden text-center sm:block">
       <p className="text-[12px] font-medium text-[#66686d]">
         Secure access management for modern teams
       </p>

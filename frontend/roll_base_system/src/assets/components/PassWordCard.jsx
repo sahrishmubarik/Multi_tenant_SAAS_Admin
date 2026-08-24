@@ -261,7 +261,7 @@ export default function PasswordCard() {
 
         {/* Message */}
         {message && (
-          <p className="rounded-lg bg-[#fef2f2] px-3 py-2 text-center text-sm text-[#b34a4a]">
+          <p className="rounded-lg bg-[#fef2f2] px-3 py-2 text-center text-sm text-[var(--color-danger)]">
             {message}
           </p>
         )}

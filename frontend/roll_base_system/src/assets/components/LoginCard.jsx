@@ -20,8 +20,12 @@ export default function LoginCard() {
   }
   async function handleSubmit(event) {
     event.preventDefault();
-    if (!formData.email || !formData.password) {
-      setMessage("All fields are required.");
+    if (!formData.email)  {
+      setMessage("Email is required.");
+      return;
+    }
+    if(!formData.password){
+      setMessage("Password is required.");
       return;
     }
 
@@ -156,7 +160,7 @@ export default function LoginCard() {
               focus:ring-2
               focus:ring-[var(--color-primary-light)]
             "
-              required
+             
             />
           </div>
 
@@ -192,7 +196,7 @@ export default function LoginCard() {
                 focus:ring-2
                 focus:ring-[var(--color-primary-light)]
               "
-                required
+                
               />
 
               <button
@@ -249,7 +253,7 @@ export default function LoginCard() {
 
           {/* Message */}
           {message && (
-            <p className="text-center text-sm text-[var(--color-text-secondary)]">
+            <p className="text-center text-sm text-[var(--color-danger)]">
               {message}
             </p>
           )}

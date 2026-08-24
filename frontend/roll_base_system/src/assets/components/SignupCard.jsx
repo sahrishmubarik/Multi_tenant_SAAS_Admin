@@ -25,11 +25,27 @@ export default function SignupCard() {
   }
   async function handleSubmit(event) {
     event.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      setMessage("Password doesn't match.  ");
+    if(!formData.name){
+      setMessage("Username is required");
       return;
     }
+     if(!formData.email){
+      setMessage("Email is required");
+      return;
+    }
+     if(!formData.password){
+      setMessage("Password is required");
+      return;
+    }
+     if(!formData.confirmPassword){
+      setMessage("Confirm password is required");
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("Password doesn't match.");
+      return;
+    }
+    setMessage("");
 
     try {
       const response = await fetch("http://localhost:3000/api/v1/auth/signup", {
@@ -133,7 +149,6 @@ export default function SignupCard() {
               focus:ring-2
               focus:ring-[var(--color-primary-light)]
             "
-              required
             />
           </div>
 
@@ -168,7 +183,7 @@ export default function SignupCard() {
               focus:ring-2
               focus:ring-[var(--color-primary-light)]
             "
-              required
+            
             />
           </div>
 
@@ -204,7 +219,6 @@ export default function SignupCard() {
                 focus:ring-2
                 focus:ring-[var(--color-primary-light)]
               "
-                required
               />
 
               <button
@@ -256,7 +270,7 @@ export default function SignupCard() {
                 focus:ring-2
                 focus:ring-[var(--color-primary-light)]
               "
-                required
+                
               />
 
               <button
@@ -285,7 +299,7 @@ export default function SignupCard() {
 
           {/* Message */}
           {message && (
-            <p className="text-center text-sm text-[var(--color-text-secondary)]">
+            <p className="text-center text-sm text-[var(--color-danger)]">
               {message}
             </p>
           )}
