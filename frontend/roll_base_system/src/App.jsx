@@ -13,6 +13,7 @@ import CreateWorkspace from "./pages/workspace.jsx";
 import MyWorkspace from "./pages/MyWorkspace.jsx";
 import Members from "./pages/Members.jsx";
 import AcceptInvitation from "./pages/AcceptInvitation";
+import Activity from "./pages/Activity.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -32,7 +33,7 @@ function App() {
 
            <Route path="members" element={<Members/>} />
 
-          {/* <Route path="activity" element={<Activity />} /> */}
+          <Route path="activity" element={<Activity/>} />
 
           <Route path="create-workspace" element={<CreateWorkspace />}/>
         </Route>
