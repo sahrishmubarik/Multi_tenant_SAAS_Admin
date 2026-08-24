@@ -11,7 +11,11 @@ export default function InviteMemberCard({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+      if(!email){
+        setError("Email is required");
+        return
+      }
+      setError("");
     try {
       setLoading(true);
       setMessage("");
@@ -20,7 +24,7 @@ export default function InviteMemberCard({
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-  `http://localhost:3000/api/v1/workspace/invitation/${workspaceId}`,
+  `http://localhost:3000/api/v1/workspace-invitation/${workspaceId}`,
   {
     method: "POST",
     headers: {
@@ -77,7 +81,6 @@ const data = await response.json();
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            required
             placeholder="member@example.com"
             className="h-10 w-full rounded-[9px] border border-[#dfdfdb] bg-white px-3 text-[14px] text-[#252629] outline-none transition placeholder:text-[#aaa] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)]"
           />

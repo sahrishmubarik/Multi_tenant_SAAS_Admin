@@ -24,7 +24,7 @@ export default function PendingInvitations({ workspaceId }) {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/workspace/invitation/status/${workspaceId}?status=PENDING`,
+        `http://localhost:3000/api/v1/workspace-invitation/status/${workspaceId}?status=PENDING`,
         {
           method: "GET",
           headers: {
@@ -49,11 +49,55 @@ export default function PendingInvitations({ workspaceId }) {
       setLoading(false);
     }
   };
+async function cancelInvitation(invitationId) {
+  const authToken = localStorage.getItem("token");
+
+  try {
+    if (!authToken) {
+      setError("Authorization token is required.");
+      return;
+    }
+
+    const response = await fetch(
+      "http://localhost:3000/api/v1/workspace-invitation/revoke",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          invitationId,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to revoke invitation"
+      );
+    }
+
+    // Remove revoked invitation from UI
+    setInvitations((prev) =>
+      prev.filter(
+        (invitation) => invitation.id !== invitationId
+      )
+    );
+
+  } catch (error) {
+    console.error("Revoke invitation error:", error);
+    setError(error.message);
+  }
+}
 
   useEffect(() => {
     fetchPendingInvitations();
   }, [workspaceId]);
 
+  
   return (
     <div className="mt-6 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
       <div className="border-b border-[#e7e7e5] px-5 py-4">
@@ -101,10 +145,20 @@ export default function PendingInvitations({ workspaceId }) {
                     {invitation.status}
                   </p>
                 </div>
-
-                <span className="text-[11px] font-medium uppercase tracking-wide text-[#77797e]">
-                  Pending
-                </span>
+                 <div className="flex justify-end gap-2">
+                     <button
+                            type="button"
+                          onClick={() => cancelInvitation(invitation.id)}
+                            className="rounded-[8px] border border-[var(--color-border)] bg-white px-3 py-1.5 text-[12px] font-medium text-[var(--color-text-secondary)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                          >Cancel invitation
+                          </button>
+                      <button
+                            type="button"
+                           
+                            className="rounded-[8px] border border-[var(--color-border)] bg-white px-3 py-1.5 text-[12px] font-medium text-[var(--color-text-secondary)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                          >Pending
+                          </button>
+                </div>
               </div>
             ))}
           </div>
