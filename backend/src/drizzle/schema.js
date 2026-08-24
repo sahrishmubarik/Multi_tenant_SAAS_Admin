@@ -1,5 +1,5 @@
 import {
-  uuid,integer,unique,pgTable,serial,varchar,timestamp, boolean, pgEnum, uniqueIndex,index} 
+  uuid,integer,text, unique,pgTable,serial,varchar,timestamp, boolean, pgEnum, uniqueIndex,index} 
   from "drizzle-orm/pg-core";
 /* User Table */
 export const users = pgTable(
@@ -135,6 +135,8 @@ export const auditLog=pgTable("auditLog",{
   action: varchar("action", { length: 100 }).notNull(),
  // Whom / what was affected
   affectedUser: uuid("affected_user"),
+  message: text("message").notNull(),
   // When the action happened
   createdAt: timestamp("created_at") .defaultNow() .notNull(),
+
 });
