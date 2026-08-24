@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "db:generate": "drizzle-kit generate --config=drizzle.config.js",
-    "db:migrate": "npx tsx src/drizzle/migrate.js",
+    "db:migrate": "node src/drizzle/migrate.js",
     "studio": "drizzle-kit studio",
     "start": "node src/server.js",
     "dev": "node src/server.js",
