@@ -124,13 +124,21 @@ export const createInvitation = async (req, res) => {
       `Invitation to join ${existingWorkspace.workspaceName}`,
       html,
     );
+    const [performingUser] = await db
+  .select({
+    id: users.id,
+    name: users.name,
+  })
+  .from(users)
+  .where(eq(users.id, req.user.id));
 
     // Audit log
-    const auditResult = await createAuditLog({
-      performedBy: req.user.id,
-      action: "Send invitation to new member",
-      affectedUser: null,
-    });
+  const auditResult = await createAuditLog({
+  performedBy: req.user.id,
+  action: "Send invitation",
+  affectedUser: null,
+  message: `${performingUser.name} sent invitation to ${email}.`,
+});
 
     // ONLY ONE SUCCESS RESPONSE
     return res.status(201).json({
@@ -144,7 +152,7 @@ export const createInvitation = async (req, res) => {
         expiresAt: invitation.expiresAt,
       },
 
-      audit: auditResult?.message,
+      audit: auditResult,
     });
   } catch (error) {
     console.log("Invitation error:", error);

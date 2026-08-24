@@ -53,63 +53,59 @@ export const acceptInvitation = async (req, res) => {
     }
 
     // Get logged-in user
-    const [user] = await db
-      .select({
-        id: users.id,
-        username: users.username,
-        email: users.email,
-      })
-      .from(users)
-      .where(eq(users.id, userId));
+  const [user] = await db
+  .select({
+    id: users.id,
+    name: users.name,
+    email: users.email,
+  })
+  .from(users)
+  .where(eq(users.id, userId));
 
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found.",
-      });
-    }
+if (!user) {
+  return res.status(404).json({
+    message: "User not found.",
+  });
+}
 
-    // Invitation email must match logged-in user
-    if (
-      user.email.toLowerCase() !==
-      invitation.email.toLowerCase()
-    ) {
-      return res.status(403).json({
-        message:
-          "This invitation was sent to a different email address.",
-      });
-    }
+if (
+  user.email.toLowerCase() !==
+  invitation.email.toLowerCase()
+) {
+  return res.status(403).json({
+    message:
+      "This invitation was sent to a different email address.",
+  });
+}
 
-    // Check existing member
-    const [existingMember] = await db
-      .select({
-        id: workspaceMembers.id,
-      })
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.userId, userId),
-          eq(
-            workspaceMembers.workspaceId,
-            invitation.workspaceId
-          )
-        )
-      );
+const [existingMember] = await db
+  .select({
+    id: workspaceMembers.id,
+  })
+  .from(workspaceMembers)
+  .where(
+    and(
+      eq(workspaceMembers.userId, userId),
+      eq(
+        workspaceMembers.workspaceId,
+        invitation.workspaceId
+      )
+    )
+  );
 
-    if (existingMember) {
-      return res.status(400).json({
-        message: "You are already a member of this workspace.",
-      });
-    }
+if (existingMember) {
+  return res.status(400).json({
+    message: "You are already a member of this workspace.",
+  });
+}
 
-    // Add member
-    await db.insert(workspaceMembers).values({
-      memberName: user.username,
-      userId,
-      workspaceId: invitation.workspaceId,
-      role: "viewer",
-      assignedBy: invitation.invitedBy,
-    });
-
+await db.insert(workspaceMembers).values({
+  memberName: user.name,
+  userId,
+  workspaceId: invitation.workspaceId,
+  role: "viewer",
+  assignedBy: invitation.invitedBy,
+});
     // Mark invitation accepted
     await db
       .update(invitations)
@@ -165,11 +161,27 @@ export const revokeInvitation = async (req, res) => {
         message: "Invitation not found or could not be updated"
       });
     }
+      const [performedUser] = await db
+      .select({
+        name: users.name,
+      })
+      .from(users)
+      .where(eq(users.id, req.user.id));
+             // Create audit log ONLY after successful update
+  
+    /* audit log activity */
+  const auditLog= await createAuditLog({
+  performedBy: req.user.id,
+  action: "Role Update",
+  affectedUser: member.userId,
+  message: `${performedUser.name} accepted invitation .`,
+});
 
     return res.status(200).json({
       message: "Invitation has been successfully revoked and invalidated.",
       invitationId: updatedInvitation.id,
-      status: updatedInvitation.status
+      status: updatedInvitation.status,
+      audit:auditLog
     });
 
   } catch (error) {
