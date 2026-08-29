@@ -6,6 +6,7 @@ import Signup from "./pages/Signup.jsx";
 import Login from "./pages/Login.jsx";
 import  ProtectedRoute  from "./assets/components/ProtectedRoute.jsx"
 import Dashboard from "./pages/Dashboard.jsx";
+import DashboardHome from "./pages/DashboardHome.jsx";
  import VerifyEmail from "./pages/VerifyEmail.jsx";
  import ResetPassword from "./pages/ResetPassword.jsx";
 import Profile from "./pages/Profile.jsx";
@@ -25,7 +26,8 @@ function App() {
          <Route path="/reset-password" element={<ResetPassword />} />
         {/* Dashboard */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}>
-          <Route index element={<Profile />} />
+          <Route index element={<DashboardHome />} />
+          {/* <Route index element={<Profile />} /> */}
 
           <Route path="profile" element={<Profile />} />
 
@@ -37,7 +39,7 @@ function App() {
 
           <Route path="create-workspace" element={<CreateWorkspace />}/>
         </Route>
-        <Route path="/accept-invitation" element={<AcceptInvitation />}/>
+        <Route path="/accept-invitation/accept" element={<AcceptInvitation />}/>
          {/* <Route path="/profile" element={<Profile/>}/>
          <Route path="/create-workspace" element={<CreateWorkspace/>}/>
          <Route path="/my-workspace" element={<MyWorkspace/>}/> */}
