@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AuthHeader from "../assets/components/AuthHeader";
+import { useNavigate } from "react-router-dom";
 export default function CreateWorkspace() {
   const [formData, setFormData] = useState({
     workspaceName: "",
@@ -7,7 +8,7 @@ export default function CreateWorkspace() {
 
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
-
+   const navigate=useNavigate();
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -31,7 +32,7 @@ export default function CreateWorkspace() {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:3000/api/v1/workspace", {
+      const response = await fetch("/api/v1/workspace", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,6 +64,7 @@ export default function CreateWorkspace() {
       setFormData({
         workspaceName: "",
       });
+       navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error("Create workspace error:", error);
 
@@ -137,6 +139,7 @@ export default function CreateWorkspace() {
                 <button
                   type="submit"
                   className="
+                  cursor-pointer
                 w-full
                 rounded-[9px]
                 bg-[var(--color-primary)]

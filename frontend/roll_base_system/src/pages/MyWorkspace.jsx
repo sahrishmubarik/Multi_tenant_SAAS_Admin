@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
-
+import { useWorkspace } from "../assets/context/WorkspaceContext";
+import { workspaceNameSchema } from  "../validations/validation.js"
 export default function MyWorkspace() {
-  const [workspace, setWorkspace] = useState(null);
+const {
+  selectedWorkspace,
+  setSelectedWorkspace,
+  removeWorkspace,
+} = useWorkspace();
 
   const [formData, setFormData] = useState({
     workspaceName: "",
@@ -13,116 +18,168 @@ export default function MyWorkspace() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
 
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [transferring, setTransferring] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   /* get workspace */
-  useEffect(() => {
-    async function getWorkspace() {
-      const token = localStorage.getItem("token");
+  // useEffect(() => {
+  //   async function getWorkspace() {
+  //     const token = localStorage.getItem("token");
 
-      try {
-        const response = await fetch(
-          "http://localhost:3000/api/v1/workspace/my-workspaces",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+  //     try {
+  //       const response = await fetch(
+  //         "/api/v1/workspace/my-workspaces",
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         },
+  //       );
 
-        const data = await response.json();
+  //       const data = await response.json();
 
-        if (!response.ok) {
-          setMessage(data.message || "Failed to get workspace.");
-          setMessageType("error");
-          return;
-        }
-        const savedWorkspaceId = localStorage.getItem("workspaceId");
+  //       if (!response.ok) {
+  //         setMessage(data.message || "Failed to get workspace.");
+  //         setMessageType("error");
+  //         return;
+  //       }
+  //       const savedWorkspaceId = localStorage.getItem("workspaceId");
 
-        const currentWorkspace =
-          data.workspaces?.find(
-            (workspace) => workspace.workspaceId === savedWorkspaceId,
-          ) || data.workspaces?.[0];
+  //       const currentWorkspace =
+  //         data.workspaces?.find(
+  //           (workspace) => workspace.workspaceId === savedWorkspaceId,
+  //         ) || data.workspaces?.[0];
 
-        if (!currentWorkspace) {
-          setMessage("No workspace found.");
-          setMessageType("error");
-          return;
-        }
+  //       if (!currentWorkspace) {
+  //         setMessage("No workspace found.");
+  //         setMessageType("error");
+  //         return;
+  //       }
 
-        localStorage.setItem("workspaceId", currentWorkspace.workspaceId);
+  //       localStorage.setItem("workspaceId", currentWorkspace.workspaceId);
 
-        setWorkspace(currentWorkspace);
+  //       setWorkspace(currentWorkspace);
 
-        setFormData({
-          workspaceName: currentWorkspace.workspaceName,
-        });
-      } catch (error) {
-        console.log("Get workspace error:", error);
+  //       setFormData({
+  //         workspaceName: currentWorkspace.workspaceName,
+  //       });
+  //     } catch (error) {
+  //       console.log("Get workspace error:", error);
 
-        setMessage("Something went wrong.");
-        setMessageType("error");
-      } finally {
-        setLoading(false);
-      }
-    }
+  //       setMessage("Something went wrong.");
+  //       setMessageType("error");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
 
-    getWorkspace();
-  }, []);
+  //   getWorkspace();
+  // }, []);
 
   /* admin get */
+  // useEffect(() => {
+  //   async function getAdmins() {
+  //     if (!workspace?.workspaceId) {
+  //       return;
+  //     }
+
+  //     // Only owner needs transfer ownership data
+  //     if (workspace.role !== "owner") {
+  //       return;
+  //     }
+
+  //     const token = localStorage.getItem("token");
+
+  //     try {
+  //       const response = await fetch(
+  //         `/api/v1/workspace/${workspace.workspaceId}/members`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         },
+  //       );
+
+  //       const data = await response.json();
+
+  //       if (!response.ok) {
+  //         setMessage(data.message || "Failed to get workspace members.");
+  //         setMessageType("error");
+  //         return;
+  //       }
+
+  //       // Only admins can become owner
+  //       const adminMembers = data.member?.filter(
+  //         (member) => member.role === "admin",
+  //       );
+  //       console.log(adminMembers);
+  //       setAdmins(adminMembers || []);
+        
+  //     } catch (error) {
+  //       console.error("Get admins error:", error);
+
+  //       setMessage("Failed to load workspace admins.");
+  //       setMessageType("error");
+  //     }
+  //   }
+
+  //   getAdmins();
+  // }, [workspace]);
   useEffect(() => {
-    async function getAdmins() {
-      if (!workspace?.workspaceId) {
-        return;
-      }
-
-      // Only owner needs transfer ownership data
-      if (workspace.role !== "owner") {
-        return;
-      }
-
-      const token = localStorage.getItem("token");
-
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/v1/workspace/${workspace.workspaceId}/members`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          setMessage(data.message || "Failed to get workspace members.");
-          setMessageType("error");
-          return;
-        }
-
-        // Only admins can become owner
-        const adminMembers = data.member?.filter(
-          (member) => member.role === "admin",
-        );
-
-        setAdmins(adminMembers || []);
-      } catch (error) {
-        console.error("Get admins error:", error);
-
-        setMessage("Failed to load workspace admins.");
-        setMessageType("error");
-      }
+  async function getAdmins() {
+    if (!selectedWorkspace?.workspaceId) {
+      setAdmins([]);
+      return;
     }
 
-    getAdmins();
-  }, [workspace]);
+    if (selectedWorkspace.role !== "owner") {
+      setAdmins([]);
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        `/api/v1/workspace/${selectedWorkspace.workspaceId}/members`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(
+          data.message || "Failed to get workspace members."
+        );
+        setMessageType("error");
+        return;
+      }
+
+      const adminMembers = data.member?.filter(
+        (member) => member.role === "admin"
+      );
+
+      setAdmins(adminMembers || []);
+    } catch (error) {
+      console.error("Get admins error:", error);
+
+      setMessage("Failed to load workspace admins.");
+      setMessageType("error");
+    }
+  }
+
+  getAdmins();
+}, [selectedWorkspace]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -139,13 +196,23 @@ export default function MyWorkspace() {
   /* update workspace name */
   async function handleSubmit(event) {
     event.preventDefault();
-
-    if (workspace?.role !== "owner") {
+    
+     const result = workspaceNameSchema.safeParse(formData);
+    
+        if (!result.success) {
+          const errorMessages = result.error.issues.map(
+            (issue) => issue.message
+          );
+    
+          setMessage(errorMessages.join(" "));
+          return;
+        }
+    if (selectedWorkspace?.role !== "owner") {
       return;
     }
 
     const token = localStorage.getItem("token");
-    const workspaceId = workspace?.workspaceId;
+    const workspaceId = selectedWorkspace?.workspaceId;
 
     if (!workspaceId) {
       setMessage("Workspace not found.");
@@ -158,7 +225,7 @@ export default function MyWorkspace() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/v1/workspace/update/${workspaceId}`,
+        `/api/v1/workspace/update/${workspaceId}`,
         {
           method: "PATCH",
           headers: {
@@ -183,7 +250,7 @@ export default function MyWorkspace() {
 
       setMessageType("success");
 
-      setWorkspace((previous) => ({
+       setSelectedWorkspace((previous) => ({
         ...previous,
         workspaceName: formData.workspaceName,
       }));
@@ -200,7 +267,7 @@ export default function MyWorkspace() {
   async function handleTransferOwnership(event) {
     event.preventDefault();
 
-    if (workspace?.role !== "owner") {
+    if (selectedWorkspace?.role !== "owner") {
       return;
     }
 
@@ -210,7 +277,12 @@ export default function MyWorkspace() {
       return;
     }
 
-    const selectedAdmin = admins.find((admin) => admin.userId === newOwnerId);
+    console.log("Before transfer:", {
+  workspaceId: selectedWorkspace.workspaceId,
+  newOwnerId,
+  admins,
+});
+    const selectedAdmin = admins.find((admin) => admin.user_Id === newOwnerId);
 
     const confirmed = window.confirm(
       `Are you sure you want to transfer ownership to ${selectedAdmin?.memberName}?`,
@@ -227,7 +299,7 @@ export default function MyWorkspace() {
 
     try {
       const response = await fetch(
-        "http://localhost:3000/api/v1/workspace/transfer-ownership",
+         `/api/v1/workspace/transfer-ownership/${selectedWorkspace.workspaceId}`,
         {
           method: "POST",
           headers: {
@@ -235,7 +307,6 @@ export default function MyWorkspace() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            workspaceId: workspace.workspaceId,
             newOwnerId: newOwnerId,
           }),
         },
@@ -257,7 +328,7 @@ export default function MyWorkspace() {
        * Current user is no longer owner.
        * Backend should change old owner -> admin.
        */
-      setWorkspace((previous) => ({
+  setSelectedWorkspace((previous) => ({
         ...previous,
         role: "admin",
       }));
@@ -265,7 +336,7 @@ export default function MyWorkspace() {
       setNewOwnerId("");
       setAdmins([]);
     } catch (error) {
-      console.log("Transfer ownership error:", error);
+      console.error("Transfer ownership error:", {error});
 
       setMessage("Something went wrong.");
       setMessageType("error");
@@ -276,15 +347,7 @@ export default function MyWorkspace() {
 
   /* Delete workspace */
   async function handleDeleteWorkspace() {
-    if (workspace?.role !== "owner") {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this workspace? This action cannot be undone.",
-    );
-
-    if (!confirmed) {
+    if (selectedWorkspace?.role !== "owner") {
       return;
     }
 
@@ -294,14 +357,14 @@ export default function MyWorkspace() {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/v1/workspace", {
+      const response = await fetch("/api/v1/workspace", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          workspaceId: workspace.workspaceId,
+          workspaceId: selectedWorkspace.workspaceId,
         }),
       });
 
@@ -317,10 +380,11 @@ export default function MyWorkspace() {
 
       setMessageType("success");
 
-      setWorkspace(null);
-      setFormData({
-        workspaceName: "",
-      });
+     removeWorkspace(selectedWorkspace.workspaceId);
+
+setFormData({
+  workspaceName: "",
+});
     } catch (error) {
       console.log("Delete workspace error:", error);
 
@@ -333,7 +397,7 @@ export default function MyWorkspace() {
 
   /* leave workspace */
   async function handleLeaveWorkspace() {
-    if (workspace?.role === "owner") {
+    if (selectedWorkspace?.role === "owner") {
       setMessage("Workspace owner cannot leave. Transfer ownership first.");
       setMessageType("error");
       return;
@@ -348,7 +412,7 @@ export default function MyWorkspace() {
     }
 
     const token = localStorage.getItem("token");
-    const workspaceId = workspace?.workspaceId;
+    const workspaceId = selectedWorkspace?.workspaceId;
 
     if (!workspaceId) {
       setMessage("Workspace not found.");
@@ -358,7 +422,7 @@ export default function MyWorkspace() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/v1/workspace/leave/${workspaceId}`,
+        `/api/v1/workspace/leave/${workspaceId}`,
         {
           method: "DELETE",
           headers: {
@@ -379,11 +443,11 @@ export default function MyWorkspace() {
       setMessageType("success");
 
       // Remove workspace from current page
-      setWorkspace(null);
+    removeWorkspace(selectedWorkspace.workspaceId);
 
-      setFormData({
-        workspaceName: "",
-      });
+setFormData({
+  workspaceName: "",
+});
     } catch (error) {
       console.error("Leave workspace error:", error);
 
@@ -392,18 +456,18 @@ export default function MyWorkspace() {
     }
   }
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-[#f4f7f4] px-6 py-10">
-        <div className="mx-auto max-w-[825px]">
-          <p className="text-sm text-[#66686d]">Loading workspace...</p>
-        </div>
-      </main>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <main className="min-h-screen bg-[#f4f7f4] px-6 py-10">
+  //       <div className="mx-auto max-w-[825px]">
+  //         <p className="text-sm text-[#66686d]">Loading workspace...</p>
+  //       </div>
+  //     </main>
+  //   );
+  // }
 
   /* have not workspace */
-  if (!workspace) {
+  if (!selectedWorkspace) {
     return (
       <main className="min-h-screen bg-[#f4f7f4] px-6 py-10">
         <div className="mx-auto max-w-[825px]">
@@ -417,7 +481,7 @@ export default function MyWorkspace() {
     );
   }
 
-  const isOwner = workspace.role === "owner";
+  const isOwner = selectedWorkspace.role === "owner";
   return (
     <main className="bg-[#E5EEE4]">
       <div className="min-h-screen bg-[#f4f7f4] px-6 py-10 sm:px-8">
@@ -430,7 +494,7 @@ export default function MyWorkspace() {
             </p>
 
             <h1 className="mt-2 text-[22px] font-semibold leading-tight text-[#17181a]">
-              {workspace.workspaceName}
+              {selectedWorkspace.workspaceName}
             </h1>
 
             <p className="mt-2 max-w-[620px] text-[14px] leading-5 text-[#5f6268]">
@@ -539,13 +603,19 @@ export default function MyWorkspace() {
                     New owner
                   </label>
 
-                  <select
+                  {/* <select
                     id="newOwner"
                     value={newOwnerId}
+                    // onChange={(event) => {
+                    //   setNewOwnerId(event.target.value);
+                    //   setMessage("");
+                    // }}
                     onChange={(event) => {
-                      setNewOwnerId(event.target.value);
-                      setMessage("");
-                    }}
+  console.log("SELECT VALUE:", event.target.value);
+
+  setNewOwnerId(event.target.value);
+  setMessage("");
+}}
                     className="
                       h-10
                       w-full
@@ -564,11 +634,48 @@ export default function MyWorkspace() {
                     <option value="">Select an admin</option>
 
                     {admins.map((admin) => (
-                      <option key={admin.userId} value={admin.userId}>
-                        {admin.memberName} — Admin
+                      <option key={admin.memberId} value={admin.user_Id}>
+                        {admin.username} — Admin
                       </option>
                     ))}
-                  </select>
+ 
+                  </select> */}
+                  <select
+  id="newOwner"
+  value={newOwnerId}
+  onChange={(event) => {
+    console.log("SELECT VALUE:", event.target.value);
+
+    setNewOwnerId(event.target.value);
+    setMessage("");
+  }}
+  className="
+    h-10
+    w-full
+    cursor-pointer
+    rounded-[9px]
+    border border-[#dfdfdb]
+    bg-white
+    px-3
+    text-[14px]
+    text-[#252629]
+    outline-none
+    focus:border-[#aeb0b5]
+    focus:ring-2
+    focus:ring-[#eeeeec]
+  "
+>
+  <option value="">Select an admin</option>
+
+  {admins.map((admin) => (
+    <option
+      key={admin.memberId}
+      value={admin.user_id}
+    >
+      {admin.username} — Admin
+    </option>
+  ))}
+</select>
 
                   {admins.length === 0 && (
                     <p className="mt-2 text-[12px] text-[#77797e]">
@@ -604,42 +711,117 @@ export default function MyWorkspace() {
               {/* Delete Workspace */}
 
               <div className="mt-6 overflow-hidden rounded-[18px] border border-red-200 bg-white container-shadow">
-                <div className="border-b border-red-100 px-5 py-4">
-                  <h2 className="text-[15px] font-semibold text-red-700">
-                    Delete workspace
-                  </h2>
+  <div className="border-b border-red-100 px-5 py-4">
+    <h2 className="text-[15px] font-semibold text-red-700">
+      Delete workspace
+    </h2>
 
-                  <p className="mt-1 text-[13px] text-[#66686d]">
-                    Permanently delete this workspace and its data.
-                  </p>
-                </div>
+    <p className="mt-1 text-[13px] text-[#66686d]">
+      Permanently delete this workspace and its data.
+    </p>
+  </div>
 
-                <div className="flex items-center justify-between gap-4 px-5 py-5">
-                  <p className="text-[12px] text-[#77797e]">
-                    This action cannot be undone.
-                  </p>
+  <div className="flex items-center justify-between gap-4 px-5 py-5">
+    <p className="text-[12px] text-[#77797e]">
+      This action cannot be undone.
+    </p>
 
-                  <button
-                    type="button"
-                    onClick={handleDeleteWorkspace}
-                    disabled={deleting}
-                    className="
-                      rounded-[9px]
-                      bg-red-600
-                      px-4
-                      py-2
-                      text-[13px]
-                      font-medium
-                      text-white
-                      hover:bg-red-700
-                      disabled:cursor-not-allowed
-                      disabled:opacity-60
-                    "
-                  >
-                    {deleting ? "Deleting..." : "Delete workspace"}
-                  </button>
-                </div>
-              </div>
+    <button
+      type="button"
+      onClick={() => setShowDeleteModal(true)}
+      disabled={deleting}
+      className="
+        cursor-pointer
+        rounded-[9px]
+        bg-red-600
+        px-4
+        py-2
+        text-[13px]
+        font-medium
+        text-white
+        transition
+        hover:bg-red-700
+        disabled:cursor-not-allowed
+        disabled:opacity-60
+      "
+    >
+      Delete workspace
+    </button>
+  </div>
+</div>
+
+{showDeleteModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div
+          className="
+            w-full max-w-md
+            rounded-xl
+            border border-[var(--color-border)]
+            bg-white
+            p-6
+            shadow-2xl
+          "
+        >
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
+              Delete workspace?
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
+              Are you sure you want to delete this workspace?
+              This action cannot be undone.
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(false)}
+              className="
+                h-9
+                cursor-pointer
+                rounded-lg
+                border border-[var(--color-border)]
+                bg-white
+                px-4
+                text-sm
+                font-medium
+                text-[var(--color-text-secondary)]
+                transition
+                hover:bg-[var(--color-surface-alt)]
+              "
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDeleteWorkspace}
+              disabled={deleting}
+              className="
+                h-9
+                cursor-pointer
+                rounded-lg
+                bg-[var(--color-danger)]
+                px-4
+                text-sm
+                font-medium
+                text-white
+                transition
+                hover:bg-red-700
+                disabled:cursor-not-allowed
+                disabled:opacity-60
+              "
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+ 
+
             </>
           )}
 
@@ -655,7 +837,7 @@ export default function MyWorkspace() {
                 </p>
 
                 <h2 className="mt-2 text-[18px] font-semibold text-[#17181a]">
-                  {workspace.workspaceName}
+                  {selectedWorkspace.workspaceName}
                 </h2>
 
                 <p className="mt-2 text-[13px] leading-5 text-[#66686d]">

@@ -91,7 +91,7 @@ export default function Profile() {
                 <input
                   type="text"
                   value={profile.name}
-                  readOnly
+                   disabled
                   className="
           h-10
           w-full
@@ -100,7 +100,7 @@ export default function Profile() {
           bg-white
           px-3
           text-[14px]
-          text-[#252629]
+             text-[#999b9f]
           outline-none
           transition
           focus:border-[#aeb0b5]

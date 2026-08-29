@@ -25,7 +25,7 @@ const workspaceId =localStorage.getItem("workspaceId");
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/workspace/activity/${workspaceId}`,
+        `/api/v1/workspace/activity/${workspaceId}`,
         {
           method: "GET",
           headers: {
@@ -44,7 +44,7 @@ const workspaceId =localStorage.getItem("workspaceId");
 
       setActivities(data.activities || []);
     } catch (error) {
-      console.error("Activity error:", error);
+      console.log("Activity error:", error);
       setError(error.message);
     } finally {
       setLoading(false);
