@@ -51,7 +51,7 @@ export default function PasswordCard() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:3000/api/v1/auth/change-password",
+        "/api/v1/auth/change-password",
         {
           method: "PATCH",
           headers: {

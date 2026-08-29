@@ -1,8 +1,8 @@
-// Import the core React component
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import { useState } from "react";
+
+import { signupSchema } from "../../validations/validation";
 
 export default function SignupCard() {
   const [formData, setFormData] = useState({
@@ -11,71 +11,94 @@ export default function SignupCard() {
     password: "",
     confirmPassword: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [message, setMessage] = useState("");
 
-  /* save the change values */
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
+
+  const [message, setMessage] = useState("");
+  const [Error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  /* =========================
+     HANDLE CHANGE
+  ========================= */
+
   function handleChange(event) {
     const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
+
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
     }));
+
+    setError("");
+    setMessage("");
   }
+
+  /* =========================
+     SIGNUP
+  ========================= */
+
   async function handleSubmit(event) {
     event.preventDefault();
-    if(!formData.name){
-      setMessage("Username is required");
-      return;
-    }
-     if(!formData.email){
-      setMessage("Email is required");
-      return;
-    }
-     if(!formData.password){
-      setMessage("Password is required");
-      return;
-    }
-     if(!formData.confirmPassword){
-      setMessage("Confirm password is required");
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setMessage("Password doesn't match.");
-      return;
-    }
+
+    setError("");
     setMessage("");
 
+    /* ZOD VALIDATION */
+
+    const result = signupSchema.safeParse(formData);
+
+    if (!result.success) {
+      const errorMessages = result.error.issues.map(
+        (issue) => issue.message
+      );
+
+      setError(errorMessages.join(" "));
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const response = await fetch("http://localhost:3000/api/v1/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "/api/v1/auth/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(result.data),
+        }
+      );
 
       const data = await response.json();
 
-     
-      console.log("Data:", data);
-
       if (!response.ok) {
         if (data.errors) {
-          const errorMessages = Object.values(data.errors).flat();
+          const errorMessages =
+            Object.values(data.errors).flat();
 
-          setMessage(errorMessages.join(" "));
+          setError(errorMessages.join(" "));
         } else if (data.message) {
-          setMessage(data.message);
+          setError(data.message);
         } else {
-          setMessage("Signup failed. Please try again.");
+          setError(
+            "Signup failed. Please try again."
+          );
         }
 
         return;
       }
 
-      setMessage("Account created successfully!");
+      setError("");
+
+      setMessage(
+        "Account created successfully!"
+      );
 
       setFormData({
         name: "",
@@ -84,25 +107,35 @@ export default function SignupCard() {
         confirmPassword: "",
       });
     } catch (error) {
-      console.log("Signup error:", error);
-      setMessage("Something went wrong. Please try again.");
+      console.error("Signup error:", error);
+
+      setError(
+        "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   }
+
   return (
-    <div className="flex  items-center justify-center bg-[#E5EEE4] px-4 py-8">
+    <div className="flex items-center justify-center bg-[#E5EEE4] px-4 py-8">
+
       <div
         className="
-        container-shadow
-        w-full max-w-md
-        rounded-xl
-        border border-[var(--color-border)]
-        bg-white
-        p-3
-        sm:p-8
-      "
+          container-shadow
+          w-full max-w-md
+          rounded-xl
+          border border-[var(--color-border)]
+          bg-white
+          p-3
+          sm:p-8
+        "
       >
+
         {/* Heading */}
+
         <div className="mb-7 text-center">
+
           <p className="mb-1 text-sm font-medium text-[var(--color-primary)]">
             Get started
           </p>
@@ -114,12 +147,20 @@ export default function SignupCard() {
           <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
             Create your account and get started with RoleBase.
           </p>
+
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5"
+        >
+
           {/* Name */}
+
           <div>
+
             <label
               htmlFor="name"
               className="mb-2 block text-sm font-medium text-[var(--color-text-primary)]"
@@ -135,25 +176,28 @@ export default function SignupCard() {
               onChange={handleChange}
               placeholder="Enter your name"
               className="
-              h-10 w-full
-              rounded-lg
-              border border-[var(--color-border)]
-              bg-white
-              px-3
-              text-sm
-              text-[var(--color-text-primary)]
-              outline-none
-              transition
-              placeholder:text-[var(--color-text-muted)]
-              focus:border-[var(--color-primary)]
-              focus:ring-2
-              focus:ring-[var(--color-primary-light)]
-            "
+                h-10 w-full
+                rounded-lg
+                border border-[var(--color-border)]
+                bg-white
+                px-3
+                text-sm
+                text-[var(--color-text-primary)]
+                outline-none
+                transition
+                placeholder:text-[var(--color-text-muted)]
+                focus:border-[var(--color-primary)]
+                focus:ring-2
+                focus:ring-[var(--color-primary-light)]
+              "
             />
+
           </div>
 
           {/* Email */}
+
           <div>
+
             <label
               htmlFor="email"
               className="mb-2 block text-sm font-medium text-[var(--color-text-primary)]"
@@ -169,26 +213,28 @@ export default function SignupCard() {
               onChange={handleChange}
               placeholder="Enter your email"
               className="
-              h-10 w-full
-              rounded-lg
-              border border-[var(--color-border)]
-              bg-white
-              px-3
-              text-sm
-              text-[var(--color-text-primary)]
-              outline-none
-              transition
-              placeholder:text-[var(--color-text-muted)]
-              focus:border-[var(--color-primary)]
-              focus:ring-2
-              focus:ring-[var(--color-primary-light)]
-            "
-            
+                h-10 w-full
+                rounded-lg
+                border border-[var(--color-border)]
+                bg-white
+                px-3
+                text-sm
+                text-[var(--color-text-primary)]
+                outline-none
+                transition
+                placeholder:text-[var(--color-text-muted)]
+                focus:border-[var(--color-primary)]
+                focus:ring-2
+                focus:ring-[var(--color-primary-light)]
+              "
             />
+
           </div>
 
           {/* Password */}
+
           <div>
+
             <label
               htmlFor="password"
               className="mb-2 block text-sm font-medium text-[var(--color-text-primary)]"
@@ -197,49 +243,67 @@ export default function SignupCard() {
             </label>
 
             <div className="relative">
+
               <input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter your password"
                 className="
-                h-10 w-full
-                rounded-lg
-                border border-[var(--color-border)]
-                bg-white
-                px-3 pr-12
-                text-sm
-                text-[var(--color-text-primary)]
-                outline-none
-                transition
-                placeholder:text-[var(--color-text-muted)]
-                focus:border-[var(--color-primary)]
-                focus:ring-2
-                focus:ring-[var(--color-primary-light)]
-              "
+                  h-10 w-full
+                  rounded-lg
+                  border border-[var(--color-border)]
+                  bg-white
+                  px-3 pr-12
+                  text-sm
+                  text-[var(--color-text-primary)]
+                  outline-none
+                  transition
+                  placeholder:text-[var(--color-text-muted)]
+                  focus:border-[var(--color-primary)]
+                  focus:ring-2
+                  focus:ring-[var(--color-primary-light)]
+                "
               />
 
               <button
                 type="button"
-                onClick={() => setShowPassword((previous) => !previous)}
+                onClick={() =>
+                  setShowPassword(
+                    (previous) => !previous
+                  )
+                }
                 className="
-                absolute right-3 top-1/2
-                -translate-y-1/2
-                text-sm
-                text-[var(--color-text-secondary)]
-                transition-colors
-                hover:text-[var(--color-primary)]
-              "
+                  absolute right-3 top-1/2
+                  -translate-y-1/2
+                  text-sm
+                  text-[var(--color-text-secondary)]
+                  hover:text-[var(--color-primary)]
+                "
               >
-                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                <FontAwesomeIcon
+                  icon={
+                    showPassword
+                      ? faEyeSlash
+                      : faEye
+                  }
+                />
               </button>
+
             </div>
+
           </div>
 
           {/* Confirm Password */}
+
           <div>
+
             <label
               htmlFor="confirmPassword"
               className="mb-2 block text-sm font-medium text-[var(--color-text-primary)]"
@@ -248,79 +312,119 @@ export default function SignupCard() {
             </label>
 
             <div className="relative">
+
               <input
                 id="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
+                type={
+                  showConfirmPassword
+                    ? "text"
+                    : "password"
+                }
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Confirm your password"
                 className="
-                h-10 w-full
-                rounded-lg
-                border border-[var(--color-border)]
-                bg-white
-                px-3 pr-12
-                text-sm
-                text-[var(--color-text-primary)]
-                outline-none
-                transition
-                placeholder:text-[var(--color-text-muted)]
-                focus:border-[var(--color-primary)]
-                focus:ring-2
-                focus:ring-[var(--color-primary-light)]
-              "
-                
+                  h-10 w-full
+                  rounded-lg
+                  border border-[var(--color-border)]
+                  bg-white
+                  px-3 pr-12
+                  text-sm
+                  text-[var(--color-text-primary)]
+                  outline-none
+                  transition
+                  placeholder:text-[var(--color-text-muted)]
+                  focus:border-[var(--color-primary)]
+                  focus:ring-2
+                  focus:ring-[var(--color-primary-light)]
+                "
               />
 
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword((previous) => !previous)}
+                onClick={() =>
+                  setShowConfirmPassword(
+                    (previous) => !previous
+                  )
+                }
                 className="
-                absolute right-3 top-1/2
-                -translate-y-1/2
-                text-sm
-                text-[var(--color-text-secondary)]
-                transition-colors
-                hover:text-[var(--color-primary)]
-              "
+                  absolute right-3 top-1/2
+                  -translate-y-1/2
+                  text-sm
+                  text-[var(--color-text-secondary)]
+                  hover:text-[var(--color-primary)]
+                "
               >
                 <FontAwesomeIcon
-                  icon={showConfirmPassword ? faEyeSlash : faEye}
+                  icon={
+                    showConfirmPassword
+                      ? faEyeSlash
+                      : faEye
+                  }
                 />
               </button>
+
             </div>
+
           </div>
 
           {/* Button */}
-          <button type="submit" className="btn-primary mt-1 w-full">
-            Create Account
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="
+              btn-primary
+              mt-1
+              w-full
+              disabled:cursor-not-allowed
+              disabled:opacity-60
+            "
+          >
+            {loading
+              ? "Creating account..."
+              : "Create Account"}
           </button>
 
           {/* Message */}
-          {message && (
-            <p className="text-center text-sm text-[var(--color-danger)]">
-              {message}
+
+          {(Error || message) && (
+            <p
+              className={`text-center text-sm ${
+                Error
+                  ? "text-[var(--color-danger)]"
+                  : "text-[var(--color-success)]"
+              }`}
+            >
+              {Error || message}
             </p>
           )}
 
           {/* Login */}
+
           <p className="text-center text-sm text-[var(--color-text-secondary)]">
+
             Already have an account?{" "}
+
             <a
               href="/login"
               className="
-              font-semibold
-              text-[var(--color-primary)]
-              hover:text-[var(--color-primary-hover)]
-              hover:underline
-            "
+                font-semibold
+                text-[var(--color-primary)]
+                hover:text-[var(--color-primary-hover)]
+                hover:underline
+              "
             >
               Login
             </a>
+
           </p>
+
         </form>
+
       </div>
+
     </div>
   );
 }

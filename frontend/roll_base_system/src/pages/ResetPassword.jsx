@@ -54,7 +54,7 @@ export default function ResetPassword() {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/auth/reset-password?token=${encodeURIComponent(token)}`,
+         `/api/v1/auth/reset-password?token=${encodeURIComponent(token)}`,
         {
           method: "POST",
           headers: {
@@ -67,17 +67,21 @@ export default function ResetPassword() {
         },
       );
 
-      const data = await response.json();
+      // const data = await response.json();
 
-      console.log("Reset password response:", JSON.stringify(data, null, 2));
+      // console.log("Reset password response:", JSON.stringify(data, null, 2));
 
-      console.log("Status:", response.status);
+      // console.log("Status:", response.status);
+      const text = await response.text();
+
+console.log("Status:", response.status);
+console.log("Response body:", text);
 
       if (!response.ok) {
-        console.log("Reset password response:", data);
+        console.log("Reset password response:", text);
         console.log("Status:", response.status);
 
-        setMessage(data.message || `Reset failed (${response.status})`);
+        setMessage(text.message || `Reset failed (${response.status})`);
         return;
       }
 
@@ -87,7 +91,7 @@ export default function ResetPassword() {
         navigate("/login", { replace: true });
       }, 2000);
     } catch (error) {
-      console.error("Reset password error:", error);
+      console.log("Reset password error:", error);
       setMessage("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -127,7 +131,7 @@ export default function ResetPassword() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* New Password */}
+          /* New Password */
           <div>
             <label
               htmlFor="password"
