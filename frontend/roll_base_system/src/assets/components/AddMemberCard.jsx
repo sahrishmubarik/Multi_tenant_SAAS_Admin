@@ -40,7 +40,7 @@ export default function AddMemberCard({
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:3000/api/v1/workspace/member",
+        "/api/v1/workspace/member",
         {
           method: "POST",
           headers: {

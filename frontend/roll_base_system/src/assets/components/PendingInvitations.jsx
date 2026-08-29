@@ -24,7 +24,7 @@ export default function PendingInvitations({ workspaceId }) {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/workspace-invitation/status/${workspaceId}?status=PENDING`,
+        `/api/v1/workspace-invitation/status/${workspaceId}?status=PENDING`,
         {
           method: "GET",
           headers: {
@@ -59,7 +59,7 @@ async function cancelInvitation(invitationId) {
     }
 
     const response = await fetch(
-      "http://localhost:3000/api/v1/workspace-invitation/revoke",
+      "/api/v1/workspace-invitation/revoke",
       {
         method: "POST",
         headers: {
@@ -88,7 +88,7 @@ async function cancelInvitation(invitationId) {
     );
 
   } catch (error) {
-    console.error("Revoke invitation error:", error);
+    console.log("Revoke invitation error:", error);
     setError(error.message);
   }
 }
@@ -155,7 +155,7 @@ async function cancelInvitation(invitationId) {
                       <button
                             type="button"
                            
-                            className="rounded-[8px] border border-[var(--color-border)] bg-white px-3 py-1.5 text-[12px] font-medium text-[var(--color-text-secondary)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                            className= "bg-white px-3 py-1.5 text-[12px] font-medium text-[var(--color-text-secondary)] "
                           >Pending
                           </button>
                 </div>

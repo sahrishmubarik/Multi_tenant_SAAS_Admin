@@ -26,7 +26,7 @@ export default function AcceptInvitation() {
         );
 
         const response = await fetch(
-          `http://localhost:3000/api/v1/workspace-invitation/details?token=${encodeURIComponent(token)}`
+          `/api/v1/workspace-invitation/details?token=${encodeURIComponent(token)}`
         );
 
         const data = await response.json();
@@ -70,7 +70,7 @@ export default function AcceptInvitation() {
 
   const acceptInvitation = async (authToken) => {
     const response = await fetch(
-      `http://localhost:3000/api/v1/workspace-invitation/accept?token=${encodeURIComponent(token)}`,
+      `/api/v1/workspace-invitation/accept?token=${encodeURIComponent(token)}`,
       {
         method: "POST",
         headers: {

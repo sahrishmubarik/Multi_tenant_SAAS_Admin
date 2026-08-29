@@ -17,7 +17,7 @@ export default function DeleteMemberModal({
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/workspace/member/${member.memberId}`,
+        `/api/v1/workspace/member/${member.memberId}`,
         {
           method: "DELETE",
           headers: {

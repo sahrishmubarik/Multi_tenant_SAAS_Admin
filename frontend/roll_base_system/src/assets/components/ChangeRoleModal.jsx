@@ -21,7 +21,7 @@ export default function ChangeRoleModal({
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/workspace/member/role/${member.memberId}`,
+        `/api/v1/workspace/member/role/${member.memberId}`,
         {
           method: "PATCH",
           headers: {

@@ -1,8 +1,7 @@
 import { useState } from "react";
-
+import { invitationSchema } from "../../validations/validation.js"
 export default function InviteMemberCard({
-  workspaceId,
-  onInvitationSent,
+  workspaceId, onInvitationSent,
 }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -11,11 +10,18 @@ export default function InviteMemberCard({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-      if(!email){
-        setError("Email is required");
-        return
-      }
-      setError("");
+     const result = invitationSchema.safeParse(email);
+       if (!result.success) {
+           const errorMessages = result.error.issues.map(
+             (issue) => issue.message
+           );
+     
+           setError(errorMessages.join(" "));
+           return;
+         }
+     
+         setLoading(true);
+     
     try {
       setLoading(true);
       setMessage("");
@@ -24,7 +30,7 @@ export default function InviteMemberCard({
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-  `http://localhost:3000/api/v1/workspace-invitation/${workspaceId}`,
+  `/api/v1/workspace-invitation/${workspaceId}`,
   {
     method: "POST",
     headers: {
@@ -41,7 +47,7 @@ const data = await response.json();
      
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to send invitation");
+        throw new Error(data.message || "Something went wrong while sending the invitation. Please try again.");
       }
 
       setMessage("Invitation sent successfully.");
@@ -49,7 +55,7 @@ const data = await response.json();
 
       onInvitationSent();
     } catch (error) {
-      console.error("Invitation error:", error);
+      // console.error("Invitation error:", error);
       setError(error.message);
     } finally {
       setLoading(false);

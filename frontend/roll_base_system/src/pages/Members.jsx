@@ -21,7 +21,7 @@ export default function Members() {
       setPageError("");
 
       const response = await fetch(
-        `http://localhost:3000/api/v1/workspace/${workspaceId}/members`,
+        `/api/v1/workspace/${workspaceId}/members`,
         {
           method: "GET",
           headers: {
@@ -73,12 +73,11 @@ export default function Members() {
             {pageError}
           </div>
         )}
-
-        {/* Add existing member */}
-        <AddMemberCard
+                {/* Add existing member */}
+        {/* <AddMemberCard
           workspaceId={workspaceId}
           onMemberAdded={fetchMembers}
-        />
+        />  */}
 
         {/* Invite member */}
         <InviteMemberCard
