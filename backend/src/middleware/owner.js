@@ -7,7 +7,7 @@ export async function ownerMiddleware(req, res, next) {
   try {
 
     const userId = req.user.id;
-    const {workspaceId} =req.params;
+   const workspaceId =req.params.workspaceId || req.body.workspaceId || req.query.workspaceId;
 
     if (!workspaceId) {
       return res.status(400).json({

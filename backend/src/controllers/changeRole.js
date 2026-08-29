@@ -89,7 +89,7 @@ export async function changeRole(req, res) {
     return res.status(200).json({
       message: "Member role updated successfully",
       member: updateMember,
-      audit: auditResult
+      // audit: auditResult
     });
 
   } catch (error) {

@@ -83,7 +83,7 @@ export async function workSpaceMembers(req, res) {
     return res.status(201).json({
       success: true,
       message: `${memberName} has been assigned the ${role} role in the workspace.`,
-      audit:auditResult
+      // audit:auditResult
     });
   } catch (error) {
     console.error("Workspace Member Error:", error);

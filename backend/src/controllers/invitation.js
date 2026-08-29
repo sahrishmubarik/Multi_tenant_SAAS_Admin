@@ -144,21 +144,21 @@ export const createInvitation = async (req, res) => {
     return res.status(201).json({
       message: "Invitation created and email sent successfully",
 
-      invitation: {
-        id: invitation.id,
-        email: invitation.email,
-        workspaceId: invitation.workspaceId,
-        status: invitation.status,
-        expiresAt: invitation.expiresAt,
-      },
+      // invitation: {
+      //   id: invitation.id,
+      //   email: invitation.email,
+      //   workspaceId: invitation.workspaceId,
+      //   status: invitation.status,
+      //   expiresAt: invitation.expiresAt,
+      // },
 
-      audit: auditResult,
+      // audit: auditResult,
     });
   } catch (error) {
     console.log("Invitation error:", error);
 
     return res.status(500).json({
-      message: "Failed to create invitation.",
+      message: "Something went wrong while sending the invitation. Please try again.",
       error: error.message,
     });
   }

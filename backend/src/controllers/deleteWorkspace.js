@@ -67,14 +67,14 @@ export async function deleteWorkspace(req, res) {
      const auditResult= await createAuditLog({
      performedBy: req.user.id,
      action: "Role Update",
-     affectedUser: member.userId,
+     affectedUser: null,
      message: `${performedUser.name} delete workspace .`,
    });
    
     return res.status(200).json({
       success: true,
       message: "Workspace deleted successfully",
-      audit: auditResult,
+      // audit: auditResult,
     });
   } catch (error) {
     console.log("Delete Workspace Error:", error);

@@ -1,5 +1,5 @@
 import { db } from '#config/client.js';
-import { workspace } from '#drizzle/schema.js';
+import { users, workspace } from '#drizzle/schema.js';
 import { eq } from 'drizzle-orm';
 import { createAuditLog } from '#controllers/auditLogs.js';
 export async function updateWorkspace(req, res) {
@@ -36,7 +36,7 @@ export async function updateWorkspace(req, res) {
        
          /* audit log activity */
        const auditResult= await createAuditLog({
-       performedBy: req.user.id,
+       performedBy: userId,
        action: "Update workspace name",
        affectedUser: null,
        message: `${performedUser.name} update the workspace name .`,
@@ -44,7 +44,7 @@ export async function updateWorkspace(req, res) {
      
     return res.status(200).json({
       message: `Workspace name updated to ${workspaceName} successfully`,
-      audit:auditResult
+      // audit:auditResult
     });
   }
    catch (error) {

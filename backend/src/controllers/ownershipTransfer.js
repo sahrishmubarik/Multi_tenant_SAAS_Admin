@@ -1,5 +1,5 @@
 import { db } from "#config/client.js";
-import { workspace, workspaceMembers } from "#drizzle/schema.js";
+import { users ,workspace, workspaceMembers } from "#drizzle/schema.js";
 import { eq, and } from "drizzle-orm";
 import { createAuditLog } from "#controllers/auditLogs.js";
 
@@ -105,12 +105,7 @@ export const transferWorkspaceOwnership = async (req, res) => {
     });
 
     // Audit AFTER successful transaction
-    const auditResult = await createAuditLog({
-      performedBy: currentOwnerId,
-      action: "Transfer ownership",
-      affectedUser: newOwnerId,
-    });
-      const [performedUser] = await db
+    const [performedUser] = await db
           .select({
             name: users.name,
           })
@@ -135,7 +130,7 @@ export const transferWorkspaceOwnership = async (req, res) => {
         newOwnerId,
         workspaceId,
       },
-      audit: auditResult,
+      // audit: auditResult,
     });
   } catch (error) {
     console.error("Transfer ownership error:", error);

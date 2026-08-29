@@ -181,7 +181,7 @@ export const revokeInvitation = async (req, res) => {
       message: "Invitation has been successfully revoked and invalidated.",
       invitationId: updatedInvitation.id,
       status: updatedInvitation.status,
-      audit:auditLog
+      // audit:auditLog
     });
 
   } catch (error) {

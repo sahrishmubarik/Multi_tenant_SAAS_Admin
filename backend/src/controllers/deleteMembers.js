@@ -80,7 +80,7 @@ const auditResult = await createAuditLog({
 
     return res.status(200).json({
       message: "Workspace member removed successfully",
-      audit: auditResult,
+      // audit: auditResult,
     });
 
   } catch (error) {

@@ -1,5 +1,6 @@
+
 export function resetPasswordEmail(token) {
-  const resetLink = `http://localhost:5173/api/v1/auth/reset-password?token=${encodeURIComponent(token)}`;
+  const resetLink = `${process.env.BASE_URL}/reset-password?token=${encodeURIComponent(token)}`;
 
   return `
 <!DOCTYPE html>
@@ -159,7 +160,7 @@ export function resetPasswordEmail(token) {
 export function verificationEmail(token) {
   console.log(`token`,token)
   const verificationLink =
-    `http://localhost:5173/api/v1/auth/verify-email?token=${encodeURIComponent(token)}`;
+    `${process.env.BASE_URL}/verify-email?token=${encodeURIComponent(token)}`;
 
   return `
   <!DOCTYPE html>
@@ -391,8 +392,8 @@ export function verificationEmail(token) {
 
 /* Workspace invitation email */
 export function invitationEmail(token, workspaceName) {
-  const invitationLink =
-      `http://localhost:5173/accept-invitation?token=${encodeURIComponent(token)}`;
+const invitationLink =
+  `${process.env.BASE_URL}/accept-invitation/accept?token=${encodeURIComponent(token)}`;
   return `
 <!DOCTYPE html>
 <html>

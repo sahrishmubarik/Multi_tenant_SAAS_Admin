@@ -20,7 +20,7 @@ const workspace = express.Router();
 
 // All workspace routes require authentication.
 
-
+  
 
 workspace.post("/",authMiddleware, workspaceCreate);
 workspace.get("/my-workspaces",authMiddleware, getMyWorkspace);
@@ -29,7 +29,7 @@ workspace.patch("/update/:workspaceId",authMiddleware, ownerMiddleware, updateWo
 workspace.delete("/",authMiddleware, ownerMiddleware, deleteWorkspace);
 /* member delete itself from the workspace */
 workspace.delete("/leave/:workspaceId",authMiddleware,leaveWorkspace);
-workspace.post("/transfer-ownership/workspaceId",authMiddleware, ownerMiddleware,transferWorkspaceOwnership,);
+workspace.post("/transfer-ownership/:workspaceId",authMiddleware, ownerMiddleware,transferWorkspaceOwnership,);
 workspace.post( "/member", authMiddleware, ownerOrAdminMiddleware, workSpaceMembers);
 //One GET endpoint with optional filters.
 

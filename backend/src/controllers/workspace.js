@@ -79,7 +79,7 @@ export async function workspaceCreate(req, res) {
       workspaceId: newWorkspace.id,
       role: "owner",
       workspace: newWorkspace,
-      audit: auditResult,
+      // audit: auditResult,
     });
   } catch (error) {
     console.log("Workspace Error:", error);

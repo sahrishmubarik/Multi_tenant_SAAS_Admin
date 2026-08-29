@@ -119,7 +119,7 @@ export async function leaveWorkspace(req, res) {
 
     return res.status(200).json({
       message: "You have left the workspace successfully.",
-      audit: auditResult,
+      // audit: auditResult,
     });
   } catch (error) {
     console.error("Leave workspace error:", error);
