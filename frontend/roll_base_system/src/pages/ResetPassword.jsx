@@ -4,6 +4,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import AuthHeader from "../assets/components/AuthHeader";
+import { resetPasswordSchema } from "../validations/validation"
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -35,6 +36,18 @@ export default function ResetPassword() {
 
     setMessage("");
 
+    /* ZOD VALIDATION */
+    
+        const result = resetPasswordSchema.safeParse(formData);
+    
+        if (!result.success) {
+          const errorMessages = result.error.issues.map(
+            (issue) => issue.message
+          );
+    
+          setMessage(errorMessages.join(" "));
+          return;
+        }
     if (!token) {
       setMessage("Password reset token is required.");
       return;
