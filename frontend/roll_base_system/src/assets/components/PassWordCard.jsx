@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-
+import { changePasswordSchema } from "../../validations/validation.js";
 export default function PasswordCard() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -16,6 +16,7 @@ export default function PasswordCard() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  const [messageType, setMessageType] = useState("");
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -31,17 +32,29 @@ export default function PasswordCard() {
     setMessage("");
 
     // Frontend validation
-    if (
-      !formData.currentPassword ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
-      setMessage("Please fill in all password fields.");
+    // if (
+    //   !formData.currentPassword ||
+    //   !formData.password ||
+    //   !formData.confirmPassword
+    // ) {
+    //   setMessage("Please fill in all password fields.");
+    //   return;
+    // }
+    /* ZOD VALIDATION */
+
+    const result = changePasswordSchema.safeParse(formData);
+
+    if (!result.success) {
+      const errorMessages = result.error.issues.map((issue) => issue.message);
+
+      setMessage(errorMessages.join(" "));
+      setMessageType("error");
       return;
     }
-
+    setMessage("");
     if (formData.password !== formData.confirmPassword) {
       setMessage("New password and confirm password do not match.");
+      setMessageType("error");
       return;
     }
 
@@ -50,31 +63,29 @@ export default function PasswordCard() {
 
       const token = localStorage.getItem("token");
 
-      const response = await fetch(
-        "/api/v1/auth/change-password",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            old_password: formData.currentPassword,
-            new_password: formData.password,
-            confirm_password: formData.confirmPassword,
-          }),
+      const response = await fetch("/api/v1/auth/change-password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({
+          old_password: formData.currentPassword,
+          new_password: formData.password,
+          confirm_password: formData.confirmPassword,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
         setMessage(data.message || "Failed to change password.");
+        setMessageType("error");
         return;
       }
 
       setMessage(data.message || "Password changed successfully.");
-
+      setMessageType("success");
       setFormData({
         currentPassword: "",
         password: "",
@@ -83,9 +94,12 @@ export default function PasswordCard() {
     } catch (error) {
       console.error("Change password error:", error);
       setMessage("Something went wrong. Please try again.");
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
+       setMessage("");
+      setMessageType("");
   }
 
   return (
@@ -261,7 +275,13 @@ export default function PasswordCard() {
 
         {/* Message */}
         {message && (
-          <p className="rounded-lg bg-[#fef2f2] px-3 py-2 text-center text-sm text-[var(--color-danger)]">
+          <p
+            className={`rounded-lg px-3 py-2 text-center text-sm ${
+              messageType === "success"
+                ? "bg-green-50 text-green-700"
+                : "bg-[#fef2f2] text-[var(--color-danger)]"
+            }`}
+          >
             {message}
           </p>
         )}
