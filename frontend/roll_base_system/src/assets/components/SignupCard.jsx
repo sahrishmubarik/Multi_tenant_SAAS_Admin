@@ -5,13 +5,12 @@ import { useState } from "react";
 import { signupSchema } from "../../validations/validation";
 
 export default function SignupCard() {
-  const [formData, setFormData] = useState({
-    name: "",
+
+const defaultFormValue ={name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-  });
-
+    confirmPassword: "",}
+      const [formData, setFormData] = useState(defaultFormValue);
   const [showPassword, setShowPassword] =
     useState(false);
 
@@ -94,18 +93,13 @@ export default function SignupCard() {
         return;
       }
 
-      setError("");
+ 
 
       setMessage(
         "Account created successfully!"
       );
 
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
+      setFormData(defaultFormValue);
     } catch (error) {
       console.error("Signup error:", error);
 
