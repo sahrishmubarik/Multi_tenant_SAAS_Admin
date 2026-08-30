@@ -11,7 +11,8 @@ const {
   const [formData, setFormData] = useState({
     workspaceName: "",
   });
-
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [showTransferModal, setShowTransferModal] = useState(false);
   const [admins, setAdmins] = useState([]);
   const [newOwnerId, setNewOwnerId] = useState("");
 
@@ -22,8 +23,19 @@ const {
   const [saving, setSaving] = useState(false);
   const [transferring, setTransferring] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+/* Set current workspace name in input */
+useEffect(() => {
+  if (selectedWorkspace) {
+    setFormData({
+      workspaceName: selectedWorkspace.workspaceName || "",
+    });
+  } else {
+    setFormData({
+      workspaceName: "",
+    });
+  }
+}, [selectedWorkspace]);
   /* get workspace */
   // useEffect(() => {
   //   async function getWorkspace() {
@@ -264,87 +276,148 @@ const {
     }
   }
   /* TRANSFER OWNERSHIP */
-  async function handleTransferOwnership(event) {
-    event.preventDefault();
+//   async function handleTransferOwnership(event) {
+//     event.preventDefault();
 
-    if (selectedWorkspace?.role !== "owner") {
-      return;
-    }
+//     if (selectedWorkspace?.role !== "owner") {
+//       return;
+//     }
 
-    if (!newOwnerId) {
-      setMessage("Please select a new owner.");
-      setMessageType("error");
-      return;
-    }
+//     if (!newOwnerId) {
+//       setMessage("Please select a new owner.");
+//       setMessageType("error");
+//       return;
+//     }
 
-    console.log("Before transfer:", {
-  workspaceId: selectedWorkspace.workspaceId,
-  newOwnerId,
-  admins,
-});
-    const selectedAdmin = admins.find((admin) => admin.user_Id === newOwnerId);
+//     console.log("Before transfer:", {
+//   workspaceId: selectedWorkspace.workspaceId,
+//   newOwnerId,
+//   admins,
+// });
+//     const selectedAdmin = admins.find((admin) => admin.user_Id === newOwnerId);
 
-    const confirmed = window.confirm(
-      `Are you sure you want to transfer ownership to ${selectedAdmin?.memberName}?`,
-    );
+//     const confirmed = window.confirm(
+//       `Are you sure you want to transfer ownership to ${selectedAdmin?.memberName}?`,
+//     );
 
-    if (!confirmed) {
-      return;
-    }
+//     if (!confirmed) {
+//       return;
+//     }
 
-    const token = localStorage.getItem("token");
+//     const token = localStorage.getItem("token");
 
-    setTransferring(true);
-    setMessage("");
+//     setTransferring(true);
+//     setMessage("");
 
-    try {
-      const response = await fetch(
-         `/api/v1/workspace/transfer-ownership/${selectedWorkspace.workspaceId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            newOwnerId: newOwnerId,
-          }),
-        },
-      );
+//     try {
+//       const response = await fetch(
+//          `/api/v1/workspace/transfer-ownership/${selectedWorkspace.workspaceId}`,
+//         {
+//           method: "POST",
+//           headers: {
+//             "Content-Type": "application/json",
+//             Authorization: `Bearer ${token}`,
+//           },
+//           body: JSON.stringify({
+//             newOwnerId: newOwnerId,
+//           }),
+//         },
+//       );
 
-      const data = await response.json();
+//       const data = await response.json();
 
-      if (!response.ok) {
-        setMessage(data.message || "Failed to transfer ownership.");
-        setMessageType("error");
-        return;
-      }
+//       if (!response.ok) {
+//         setMessage(data.message || "Failed to transfer ownership.");
+//         setMessageType("error");
+//         return;
+//       }
 
-      setMessage(data.message || "Ownership transferred successfully.");
+//       setMessage(data.message || "Ownership transferred successfully.");
 
-      setMessageType("success");
+//       setMessageType("success");
 
-      /*
-       * Current user is no longer owner.
-       * Backend should change old owner -> admin.
-       */
-  setSelectedWorkspace((previous) => ({
-        ...previous,
-        role: "admin",
-      }));
+//       /*
+//        * Current user is no longer owner.
+//        * Backend should change old owner -> admin.
+//        */
+//   setSelectedWorkspace((previous) => ({
+//         ...previous,
+//         role: "admin",
+//       }));
 
-      setNewOwnerId("");
-      setAdmins([]);
-    } catch (error) {
-      console.error("Transfer ownership error:", {error});
+//       setNewOwnerId("");
+//       setAdmins([]);
+//     } catch (error) {
+//       console.error("Transfer ownership error:", {error});
 
-      setMessage("Something went wrong.");
-      setMessageType("error");
-    } finally {
-      setTransferring(false);
-    }
+//       setMessage("Something went wrong.");
+//       setMessageType("error");
+//     } finally {
+//       setTransferring(false);
+//     }
+//   }
+
+async function handleTransferOwnership(event) {
+  event.preventDefault();
+
+  if (selectedWorkspace?.role !== "owner") {
+    return;
   }
 
+  if (!newOwnerId) {
+    setMessage("Please select a new owner.");
+    setMessageType("error");
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+
+  setTransferring(true);
+  setMessage("");
+
+  try {
+    const response = await fetch(
+      `/api/v1/workspace/transfer-ownership/${selectedWorkspace.workspaceId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          newOwnerId: newOwnerId,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setMessage(data.message || "Failed to transfer ownership.");
+      setMessageType("error");
+      return;
+    }
+
+    setMessage(data.message || "Ownership transferred successfully.");
+    setMessageType("success");
+
+    setSelectedWorkspace((previous) => ({
+      ...previous,
+      role: "admin",
+    }));
+
+    setNewOwnerId("");
+    setAdmins([]);
+    setShowTransferModal(false);
+  } catch (error) {
+    console.error("Transfer ownership error:", error);
+
+    setMessage("Something went wrong.");
+    setMessageType("error");
+  } finally {
+    setTransferring(false);
+  }
+}
   /* Delete workspace */
   async function handleDeleteWorkspace() {
     if (selectedWorkspace?.role !== "owner") {
@@ -494,7 +567,7 @@ setFormData({
             </p>
 
             <h1 className="mt-2 text-[22px] font-semibold leading-tight text-[#17181a]">
-              {selectedWorkspace.workspaceName}
+              {setSelectedWorkspace.workspaceName}
             </h1>
 
             <p className="mt-2 max-w-[620px] text-[14px] leading-5 text-[#5f6268]">
@@ -684,7 +757,7 @@ setFormData({
                   )}
 
                   <div className="mt-4 flex justify-end">
-                    <button
+                    {/* <button
                       type="submit"
                       disabled={transferring || !newOwnerId}
                       className="
@@ -703,10 +776,117 @@ setFormData({
                       "
                     >
                       {transferring ? "Transferring..." : "Transfer ownership"}
-                    </button>
+                    </button> */}
+                    <button
+  type="button"
+  disabled={transferring || !newOwnerId}
+  onClick={() => {
+    if (!newOwnerId) {
+      setMessage("Please select a new owner.");
+      setMessageType("error");
+      return;
+    }
+
+    setShowTransferModal(true);
+  }}
+  className="
+    rounded-[9px]
+    border
+    border-[#d9d9d5]
+    bg-white
+    px-4
+    py-2
+    text-[13px]
+    font-medium
+    text-[#252629]
+    hover:bg-[#f7f7f5]
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+  "
+>
+  Transfer ownership
+</button>
                   </div>
                 </form>
               </div>
+              {showTransferModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+    <div
+      className="
+        w-full
+        max-w-md
+        rounded-xl
+        border
+        border-[var(--color-border)]
+        bg-white
+        p-6
+        shadow-2xl
+      "
+    >
+      <div className="mb-5">
+        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
+          Transfer ownership?
+        </h2>
+
+        <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
+          Are you sure you want to transfer ownership of this workspace?
+        </p>
+
+        <p className="mt-3 text-sm leading-6 text-[#252629]">
+          The selected admin will become the new owner, and you will become an
+          admin.
+        </p>
+      </div>
+
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={() => setShowTransferModal(false)}
+          disabled={transferring}
+          className="
+            h-9
+            cursor-pointer
+            rounded-lg
+            border border-[var(--color-border)]
+            bg-white
+            px-4
+            text-sm
+            font-medium
+            text-[var(--color-text-secondary)]
+            transition
+            hover:bg-[var(--color-surface-alt)]
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+          "
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          onClick={handleTransferOwnership}
+          disabled={transferring}
+          className="
+            h-9
+            cursor-pointer
+            rounded-lg
+            bg-[var(--color-danger)]
+            px-4
+            text-sm
+            font-medium
+            text-white
+            transition
+            hover:bg-red-700
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+          "
+        >
+          {transferring ? "Transferring..." : "Yes, transfer ownership"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
               {/* Delete Workspace */}
 
