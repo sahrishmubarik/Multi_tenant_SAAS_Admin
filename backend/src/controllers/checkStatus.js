@@ -20,8 +20,8 @@ export async function checkInvitationStatus(req, res) {
       });
     }
 
-    const allowedStatus = ["PENDING", "ACCEPTED"];
-
+    const allowedStatus = ["PENDING", "ACCEPTED", "REVOKED"];
+    console.log(status);
     if (!allowedStatus.includes(status)) {
       return res.status(400).json({
         message: `Invalid status. You can only choose from: ${allowedStatus.join(", ")}`,
@@ -42,7 +42,7 @@ export async function checkInvitationStatus(req, res) {
           eq(invitations.status, status)
         )
       );
-
+      console.log(checkStatus);
     return res.status(200).json({
       message: "Status fetched successfully",
       count: checkStatus.length,

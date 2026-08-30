@@ -6,6 +6,7 @@ import {
 } from "#drizzle/schema.js";
 import { eq, and } from "drizzle-orm";
 import { hashToken } from "#utils/cryptoUtils.js";
+import { createAuditLog } from "#controllers/auditLogs.js";
 
 export const acceptInvitation = async (req, res) => {
   const { token } = req.query;
