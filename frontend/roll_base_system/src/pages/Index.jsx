@@ -26,7 +26,7 @@ export default function Index() {
             secure control plane.
           </p>
 
-          <div className="mt-5 flex items-center justify-center gap-12">
+          <div className="mt-5 flex items-center justify-center gap-4">
             <a href="/signup" className="btn-primary px-5 py-2">
               Get Started 
             </a>
