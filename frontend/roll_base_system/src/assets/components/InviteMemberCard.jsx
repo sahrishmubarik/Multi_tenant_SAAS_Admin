@@ -10,7 +10,7 @@ export default function InviteMemberCard({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-     const result = invitationSchema.safeParse(email);
+     const result = invitationSchema.safeParse({email});
        if (!result.success) {
            const errorMessages = result.error.issues.map(
              (issue) => issue.message

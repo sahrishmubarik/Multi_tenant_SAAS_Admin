@@ -24,7 +24,7 @@ export default function PendingInvitations({ workspaceId }) {
       }
 
       const response = await fetch(
-        `/api/v1/workspace-invitation/status/${workspaceId}?status=PENDING`,
+        `/api/v1/workspace-invitation/status/${workspaceId}?status=REVOKED`,
         {
           method: "GET",
           headers: {
