@@ -50,7 +50,7 @@ export default function LoginCard() {
     /* ZOD VALIDATION */
 
     const result = loginSchema.safeParse(formData);
-
+    console.log(result)
     if (!result.success) {
       const errorMessages = result.error.issues.map(
         (issue) => issue.message
@@ -72,7 +72,8 @@ export default function LoginCard() {
       });
 
       const data = await response.json();
-
+      console.log("Response status:", response.status);
+      console.log("Response body:", data);
       if (!response.ok) {
         if (data.errors) {
           const errorMessages = Object.values(data.errors).flat();
@@ -100,7 +101,7 @@ export default function LoginCard() {
 
       navigate("/dashboard", { replace: true });
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error:", {error});
 
       setError("Something went wrong. Please try again.");
     } finally {
@@ -154,7 +155,7 @@ export default function LoginCard() {
 
       setMessage("Reset link sent to your email!");
     } catch (error) {
-      console.error("Forgot password error:", error);
+      console.error("Forgot password error:", {error});
 
       setError("Network error. Please try again.");
     } finally {
