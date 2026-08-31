@@ -174,7 +174,7 @@ export const revokeInvitation = async (req, res) => {
   const auditLog= await createAuditLog({
   performedBy: req.user.id,
   action: "Role Update",
-  affectedUser: member.userId,
+  affectedUser: null,
   message: `${performedUser.name} accepted invitation .`,
 });
 
