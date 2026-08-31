@@ -29,7 +29,7 @@ invitation.post("/accept",authMiddleware, acceptInvitation);
 
 
 // Admin/Owner
-invitation.post( "/revoke", authMiddleware, revokeInvitation);
+invitation.post( "/revoke", authMiddleware,revokeInvitation);
 // Admin/Owner
 invitation.post( "/:workspaceId", authMiddleware,ownerOrAdminMiddleware, createInvitation);
 

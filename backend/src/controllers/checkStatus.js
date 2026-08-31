@@ -46,7 +46,7 @@ export async function checkInvitationStatus(req, res) {
     return res.status(200).json({
       message: "Status fetched successfully",
       count: checkStatus.length,
-      member: checkStatus,
+      invitations: checkStatus,
     });
   } catch (error) {
     console.log("Don't fetch invitation status:", error);
