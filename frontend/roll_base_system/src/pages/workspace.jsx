@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AuthHeader from "../assets/components/AuthHeader";
 import { useNavigate } from "react-router-dom";
+import {nameSchema} from "../validations/validation.js";
 export default function CreateWorkspace() {
   const [formData, setFormData] = useState({
     workspaceName: "",
@@ -16,7 +17,24 @@ export default function CreateWorkspace() {
       ...prevData,
       [name]: value,
     }));
+     
 
+        if (name === "name") {
+          const result = nameSchema.safeParse(value);
+    
+          if (!result.success) {
+            setMessage((previous) => ({
+              ...previous,
+              name: result.error.issues[0].message,
+            }));
+          } else {
+            setMessage((previous) => ({
+              ...previous,
+              name: "",
+            }));
+          }
+          setMessageType("error");
+        }
     // Remove previous message when user starts typing again
     setMessage("");
     setMessageType("");

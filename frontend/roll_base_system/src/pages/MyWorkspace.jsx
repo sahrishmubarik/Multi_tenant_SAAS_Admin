@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useWorkspace } from "../assets/context/WorkspaceContext";
-import { workspaceNameSchema } from  "../validations/validation.js"
+import { workspaceNameSchema} from  "../validations/validation.js"
+
 export default function MyWorkspace() {
 const {
   selectedWorkspace,
@@ -201,8 +202,28 @@ useEffect(() => {
       [name]: value,
     }));
 
-    setMessage("");
-    setMessageType("");
+
+
+            if (name === "name") {
+              const result =workspaceNameSchema.safeParse(value);
+        
+              if (!result.success) {
+                setMessage((previous) => ({
+                  ...previous,
+                  name: result.error.issues[0].message,
+                }));
+              } else {
+                setMessage((previous) => ({
+                  ...previous,
+                  name: "",
+                }));
+              }
+              setMessageType("error");
+            }
+        // Remove previous message when user starts typing again
+        setMessage("");
+        setMessageType("");
+    
   }
 
   /* update workspace name */
