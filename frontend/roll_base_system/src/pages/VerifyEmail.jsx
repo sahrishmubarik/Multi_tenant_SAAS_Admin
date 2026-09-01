@@ -20,7 +20,7 @@ export default function VerifyEmail() {
 
     console.log("Token on frontend:", token);
 
-    if (!token) {
+    if(!token) {
       setMessage("Verification token is required.");
       return;
     }
@@ -71,7 +71,7 @@ export default function VerifyEmail() {
         <button
           type="button"
           onClick={() => navigate("/login")}
-          className="btn-primary mt-6"
+          className="btn-primary  px-3 py-1 "
         >
           Go to Login
         </button>
