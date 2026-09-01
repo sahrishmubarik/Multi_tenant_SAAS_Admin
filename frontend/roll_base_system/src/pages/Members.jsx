@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import MembersList from "../assets/components/MembersList.jsx";
-import AddMemberCard from "../assets/components/AddMemberCard.jsx";
+// import AddMemberCard from "../assets/components/AddMemberCard.jsx";
 import InviteMemberCard from "../assets/components/InviteMemberCard.jsx";
  import PendingInvitations from "../assets/components/PendingInvitations.jsx";
 
@@ -21,7 +21,8 @@ export default function Members() {
       setPageError("");
 
       const response = await fetch(
-        `/api/v1/workspace/${workspaceId}/members?role=owner`,
+        `/api/v1/workspace/${workspaceId}/members`,
+      
         {
           method: "GET",
           headers: {
