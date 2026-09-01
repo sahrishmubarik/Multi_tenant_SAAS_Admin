@@ -39,7 +39,7 @@ workspace.post( "/member", authMiddleware, ownerOrAdminMiddleware, workSpaceMemb
 //   /members?workspaceId=123&role=admin
 
 workspace.get( "/:workspaceId/members",authMiddleware,getWorkspaceMembers);
-workspace.patch("/member/role/:memberId",authMiddleware, ownerOrAdminMiddleware, changeRole);
+workspace.patch("/:workspaceId/members/:memberId/role",authMiddleware, ownerOrAdminMiddleware, changeRole);
 workspace.get("/:workspaceId/members/:memberId",authMiddleware,ownerOrAdminMiddleware,getWorkspaceMembers);
 workspace.get("/:workspaceId/members/role/:role",authMiddleware,ownerOrAdminMiddleware,getMemberOnBaseOfRole);
 workspace.delete("/member/:memberId", authMiddleware, ownerOrAdminMiddleware, deleteMember);
