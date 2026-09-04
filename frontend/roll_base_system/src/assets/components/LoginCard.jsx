@@ -1,8 +1,5 @@
 import { useState } from "react";
-import {
-  faEye,
-  faEyeSlash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 
@@ -23,7 +20,7 @@ export default function LoginCard() {
 
   const [message, setMessage] = useState("");
   const [Error, setError] = useState("");
-
+  const [errors, setErrors] = useState("");
   const [toast, setToast] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -35,6 +32,7 @@ export default function LoginCard() {
   ========================= */
 
   function handleChange(event) {
+    event.preventDefault();
     const { name, value } = event.target;
 
     setFormData((previous) => ({
@@ -42,33 +40,47 @@ export default function LoginCard() {
       [name]: value,
     }));
 
-    // Clear old messages
-    setError("");
-    setMessage("");
-
     /* =========================
        EMAIL FIELD VALIDATION
     ========================= */
-
     if (name === "email") {
       const result = emailSchema.safeParse(value);
 
       if (!result.success) {
-        setError(result.error.issues[0].message);
+        setErrors((previous) => ({
+          ...previous,
+          email: result.error.issues[0].message,
+        }));
+      } else {
+        setErrors((previous) => ({
+          ...previous,
+          email: "",
+        }));
       }
     }
 
     /* =========================
        PASSWORD FIELD VALIDATION
     ========================= */
-
     if (name === "password") {
       const result = passwordSchema.safeParse(value);
 
       if (!result.success) {
-        setError(result.error.issues[0].message);
+        setErrors((previous) => ({
+          ...previous,
+          password: result.error.issues[0].message,
+        }));
+      } else {
+        setErrors((previous) => ({
+          ...previous,
+          password: "",
+        }));
       }
     }
+
+    // Clear old messages
+    setError("");
+    setMessage("");
   }
 
   /* =========================
@@ -78,6 +90,24 @@ export default function LoginCard() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    const result = loginSchema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors = {};
+
+      result.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0];
+
+        if (fieldName && !fieldErrors[fieldName]) {
+          fieldErrors[fieldName] = issue.message;
+        }
+      });
+
+      setErrors(fieldErrors);
+
+      return;
+    }
+
     setError("");
     setMessage("");
     setToast("");
@@ -86,19 +116,19 @@ export default function LoginCard() {
        COMPLETE ZOD VALIDATION
     ========================= */
 
-    const result = loginSchema.safeParse(formData);
+    // const result = loginSchema.safeParse(formData);
 
-    console.log("Zod result:", result);
+    // console.log("Zod result:", result);
 
-    if (!result.success) {
-      const errorMessages = result.error.issues.map(
-        (issue) => issue.message
-      );
+    // if (!result.success) {
+    //   const errorMessages = result.error.issues.map(
+    //     (issue) => issue.message
+    //   );
 
-      setError(errorMessages.join(" "));
+    //   setError(errorMessages.join(" "));
 
-      return;
-    }
+    //   return;
+    // }
 
     setLoading(true);
 
@@ -124,8 +154,7 @@ export default function LoginCard() {
 
       if (!response.ok) {
         if (data.errors) {
-          const errorMessages =
-            Object.values(data.errors).flat();
+          const errorMessages = Object.values(data.errors).flat();
 
           setError(errorMessages.join(" "));
         } else if (data.message) {
@@ -155,18 +184,25 @@ export default function LoginCard() {
         Wait 1 second so the user can see
         the success toast before redirecting.
       */
+      const invitationToken = sessionStorage.getItem("invitationToken");
 
+      if (invitationToken) {
+        navigate(
+          `/accept-invitation?token=${encodeURIComponent(invitationToken)}`,
+        );
+        return;
+      }
+
+      navigate("/dashboard");
       setTimeout(() => {
         navigate("/dashboard", {
           replace: true,
         });
-      }, 1000);
+      }, 2000);
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error:", { error });
 
-      setError(
-        "Something went wrong. Please try again."
-      );
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -200,18 +236,15 @@ export default function LoginCard() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "/api/v1/auth/forget-password",
-        {
-          method: "POST",
+      const response = await fetch("/api/v1/auth/forget-password", {
+        method: "POST",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-          body: JSON.stringify(result.data),
-        }
-      );
+        body: JSON.stringify(result.data),
+      });
 
       const data = await response.json();
 
@@ -220,9 +253,7 @@ export default function LoginCard() {
       ========================= */
 
       if (!response.ok) {
-        setError(
-          data.message || "Something went wrong."
-        );
+        setError(data.message || "Something went wrong.");
 
         return;
       }
@@ -233,14 +264,9 @@ export default function LoginCard() {
 
       setMessage("Reset link sent to your email!");
     } catch (error) {
-      console.error(
-        "Forgot password error:",
-        error
-      );
+      console.error("Forgot password error:", error);
 
-      setError(
-        "Network error. Please try again."
-      );
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -248,7 +274,6 @@ export default function LoginCard() {
 
   return (
     <div className="relative flex items-center bg-[#E5EEE4] px-6 mt-4">
-
       {/* =========================
           SUCCESS TOAST
       ========================= */}
@@ -277,7 +302,7 @@ export default function LoginCard() {
       <div
         className="
           container-shadow
-          w-full max-w-md
+          w-[370px]
           rounded-xl
           border border-[var(--color-border)]
           bg-white
@@ -285,13 +310,11 @@ export default function LoginCard() {
           sm:p-8
         "
       >
-
         {/* =========================
             HEADING
         ========================= */}
 
         <div className="mb-7 text-center">
-
           <p className="mb-1 text-sm font-medium text-[var(--color-primary)]">
             Welcome back
           </p>
@@ -303,24 +326,18 @@ export default function LoginCard() {
           <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
             Pick up where you left off.
           </p>
-
         </div>
 
         {/* =========================
             FORM
         ========================= */}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-        >
-
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* =========================
               EMAIL
           ========================= */}
 
           <div>
-
             <label
               htmlFor="email"
               className="
@@ -359,7 +376,17 @@ export default function LoginCard() {
                 focus:ring-[var(--color-primary-light)]
               "
             />
-
+            {errors.email && (
+              <p
+                className="
+                  mt-1
+                  text-sm
+                  text-[var(--color-danger)]
+                "
+              >
+                {errors.email}
+              </p>
+            )}
           </div>
 
           {/* =========================
@@ -367,7 +394,6 @@ export default function LoginCard() {
           ========================= */}
 
           <div>
-
             <label
               htmlFor="password"
               className="
@@ -382,14 +408,9 @@ export default function LoginCard() {
             </label>
 
             <div className="relative">
-
               <input
                 id="password"
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -416,13 +437,10 @@ export default function LoginCard() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword(
-                    (previous) => !previous
-                  )
-                }
+                onClick={() => setShowPassword((previous) => !previous)}
                 className="
                   absolute
+                  cursor-pointer
                   right-3
                   top-1/2
                   -translate-y-1/2
@@ -432,17 +450,20 @@ export default function LoginCard() {
                   hover:text-[var(--color-primary)]
                 "
               >
-                <FontAwesomeIcon
-                  icon={
-                    showPassword
-                      ? faEyeSlash
-                      : faEye
-                  }
-                />
+                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
               </button>
-
             </div>
-
+            {errors.password && (
+              <p
+                className="
+                  mt-1
+                  text-sm
+                  text-[var(--color-danger)]
+                "
+              >
+                {errors.password}
+              </p>
+            )}
           </div>
 
           {/* =========================
@@ -450,7 +471,6 @@ export default function LoginCard() {
           ========================= */}
 
           <div className="text-right">
-
             <button
               type="button"
               onClick={handleForgotPassword}
@@ -466,32 +486,42 @@ export default function LoginCard() {
                 disabled:opacity-60
               "
             >
-              {loading
-                ? "Sending..."
-                : "Forgot?"}
+              {loading ? "Sending..." : "Forgot?"}
             </button>
-
           </div>
 
           {/* =========================
               LOGIN BUTTON
           ========================= */}
-
           <button
             type="submit"
             disabled={loading}
             className="
-              btn-primary
-              w-full
-              disabled:cursor-not-allowed
-              disabled:opacity-60
-            "
+    btn-primary
+    w-full
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+  "
           >
-            {loading
-              ? "Logging in..."
-              : "Login"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span
+                  className="
+          h-4
+          w-4
+          animate-spin
+          rounded-full
+          border-2
+          border-white
+          border-t-transparent
+        "
+                />
+                Logging in...
+              </span>
+            ) : (
+              "Login"
+            )}
           </button>
-
           {/* =========================
               ERROR / SUCCESS MESSAGE
           ========================= */}
@@ -520,7 +550,6 @@ export default function LoginCard() {
             "
           >
             Don't have an account?{" "}
-
             <a
               href="/signup"
               className="
@@ -532,16 +561,12 @@ export default function LoginCard() {
             >
               Sign up
             </a>
-
           </p>
-
         </form>
       </div>
     </div>
   );
 }
-
-
 
 // import { useState } from "react";
 // import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -578,8 +603,6 @@ export default function LoginCard() {
 //       [name]: value,
 //     }));
 
- 
-
 //     if (name === "email") {
 //     const result = emailSchema.safeParse(value);
 
@@ -603,7 +626,7 @@ export default function LoginCard() {
 //      LOGIN
 //   ========================= */
 // }
- 
+
 // async function handleSubmit(event) {
 //   event.preventDefault();
 
