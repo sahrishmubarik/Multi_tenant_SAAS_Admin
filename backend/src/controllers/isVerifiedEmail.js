@@ -1,8 +1,8 @@
-import { db } from '#config/client.js';
-import { users } from '#drizzle/schema.js';
-import { eq } from 'drizzle-orm';
-import { verifiedEmailValidation } from '#validators/authValidation.js';
-import  { hashToken } from  "#utils/cryptoUtils.js";
+import { db } from "#config/client.js";
+import { users } from "#drizzle/schema.js";
+import { eq } from "drizzle-orm";
+import { verifiedEmailValidation } from "#validators/authValidation.js";
+import { hashToken } from "#utils/cryptoUtils.js";
 
 export async function verifyEmail(req, res) {
   const { token } = req.query;
@@ -36,10 +36,7 @@ export async function verifyEmail(req, res) {
     }
 
     console.log("4. DB RESET TOKEN:", user[0].resetToken);
-    console.log(
-      "5. HASH MATCH:",
-      user[0].resetToken === hashedToken
-    );
+    console.log("5. HASH MATCH:", user[0].resetToken === hashedToken);
 
     if (user[0].tokenExpiresAt < new Date()) {
       return res.status(400).json({
@@ -69,7 +66,6 @@ export async function verifyEmail(req, res) {
       success: true,
       message: "Email verified successfully.",
     });
-
   } catch (error) {
     console.error("Email Verification Error:", error);
 

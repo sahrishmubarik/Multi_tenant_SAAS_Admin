@@ -1,9 +1,5 @@
 import { db } from "#config/client.js";
-import {
-  invitations,
-  users,
-  workspace,
-} from "#drizzle/schema.js";
+import { invitations, users, workspace } from "#drizzle/schema.js";
 import { eq, and } from "drizzle-orm";
 import { hashToken } from "#utils/cryptoUtils.js";
 
@@ -30,10 +26,7 @@ export const getInvitationDetails = async (req, res) => {
         workspaceName: workspace.workspaceName,
       })
       .from(invitations)
-      .innerJoin(
-        workspace,
-        eq(invitations.workspaceId, workspace.id)
-      )
+      .innerJoin(workspace, eq(invitations.workspaceId, workspace.id))
       .where(eq(invitations.token, hashedToken));
 
     if (!invitation) {
@@ -42,10 +35,7 @@ export const getInvitationDetails = async (req, res) => {
       });
     }
 
-    if (
-      invitation.revoke === true ||
-      invitation.status === "REVOKED"
-    ) {
+    if (invitation.revoke === true || invitation.status === "REVOKED") {
       return res.status(400).json({
         message: "This invitation has been revoked",
       });
@@ -74,7 +64,7 @@ export const getInvitationDetails = async (req, res) => {
     return res.status(200).json({
       success: true,
       invitation: {
-        id:invitation.id,
+        id: invitation.id,
         email: invitation.email,
         workspaceId: invitation.workspaceId,
         workspaceName: invitation.workspaceName,
@@ -82,7 +72,6 @@ export const getInvitationDetails = async (req, res) => {
       },
       userExists: !!existingUser,
     });
-
   } catch (error) {
     console.error("Invitation details error:", error);
 

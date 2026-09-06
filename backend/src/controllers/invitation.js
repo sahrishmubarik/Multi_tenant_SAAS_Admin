@@ -1,10 +1,15 @@
-import { db } from '#config/client.js';
-import { users,invitations, workspace , workspaceMembers} from '#drizzle/schema.js';
-import { eq , and } from 'drizzle-orm';
-import {generateSecureToken,hashToken} from '#utils/cryptoUtils.js';
-import { invitationEmail } from '#templates/email.js';
-import { sendEmailNotification } from '#services/emailService.js';
-import { createAuditLog } from '#controllers/auditLogs.js';
+import { db } from "#config/client.js";
+import {
+  users,
+  invitations,
+  workspace,
+  workspaceMembers,
+} from "#drizzle/schema.js";
+import { eq, and } from "drizzle-orm";
+import { generateSecureToken, hashToken } from "#utils/cryptoUtils.js";
+import { invitationEmail } from "#templates/email.js";
+import { sendEmailNotification } from "#services/emailService.js";
+import { createAuditLog } from "#controllers/auditLogs.js";
 
 export const createInvitation = async (req, res) => {
   const { email } = req.body;
@@ -95,9 +100,7 @@ export const createInvitation = async (req, res) => {
     const hashedToken = hashToken(token);
 
     // 12 hours expiration
-    const expiresAt = new Date(
-      Date.now() + 12 * 60 * 60 * 1000,
-    );
+    const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
 
     // Create invitation
     const [invitation] = await db
@@ -113,10 +116,7 @@ export const createInvitation = async (req, res) => {
       .returning();
 
     // Create email
-    const html = invitationEmail(
-      token,
-      existingWorkspace.workspaceName,
-    );
+    const html = invitationEmail(token, existingWorkspace.workspaceName);
 
     // Send email
     await sendEmailNotification(
@@ -125,20 +125,20 @@ export const createInvitation = async (req, res) => {
       html,
     );
     const [performingUser] = await db
-  .select({
-    id: users.id,
-    name: users.name,
-  })
-  .from(users)
-  .where(eq(users.id, req.user.id));
+      .select({
+        id: users.id,
+        name: users.name,
+      })
+      .from(users)
+      .where(eq(users.id, req.user.id));
 
     // Audit log
-  const auditResult = await createAuditLog({
-  performedBy: req.user.id,
-  action: "Send invitation",
-  affectedUser: null,
-  message: `${performingUser.name} sent invitation to ${email}.`,
-});
+    const auditResult = await createAuditLog({
+      performedBy: req.user.id,
+      action: "Send invitation",
+      affectedUser: null,
+      message: `${performingUser.name} sent invitation to ${email}.`,
+    });
 
     // ONLY ONE SUCCESS RESPONSE
     return res.status(201).json({
@@ -158,7 +158,8 @@ export const createInvitation = async (req, res) => {
     console.log("Invitation error:", error);
 
     return res.status(500).json({
-      message: "Something went wrong while sending the invitation. Please try again.",
+      message:
+        "Something went wrong while sending the invitation. Please try again.",
       error: error.message,
     });
   }

@@ -19,7 +19,7 @@ export async function forgetPassword(req, res) {
         }
 
         // Service layer call  generate token function and email send to user
-       await generateAndSendToken(email, 'RESET_PASSWORD');
+        await generateAndSendToken(email, 'RESET_PASSWORD');
 
         return res.status(200).json({ message: 'Password reset token sent to your email.' });
 

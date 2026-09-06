@@ -1,5 +1,5 @@
 import { db } from "#config/client.js";
-import { users ,workspace, workspaceMembers } from "#drizzle/schema.js";
+import { users, workspace, workspaceMembers } from "#drizzle/schema.js";
 import { eq, and } from "drizzle-orm";
 import { createAuditLog } from "#controllers/auditLogs.js";
 
@@ -49,8 +49,8 @@ export const transferWorkspaceOwnership = async (req, res) => {
           and(
             eq(workspaceMembers.workspaceId, workspaceId),
             eq(workspaceMembers.userId, currentOwnerId),
-            eq(workspaceMembers.role, "owner")
-          )
+            eq(workspaceMembers.role, "owner"),
+          ),
         )
         .limit(1);
 
@@ -66,15 +66,13 @@ export const transferWorkspaceOwnership = async (req, res) => {
           and(
             eq(workspaceMembers.workspaceId, workspaceId),
             eq(workspaceMembers.userId, newOwnerId),
-            eq(workspaceMembers.role, "admin")
-          )
+            eq(workspaceMembers.role, "admin"),
+          ),
         )
         .limit(1);
 
       if (!newOwnerMember) {
-        throw new Error(
-          "NEW_OWNER_MUST_BE_EXISTING_WORKSPACE_ADMIN"
-        );
+        throw new Error("NEW_OWNER_MUST_BE_EXISTING_WORKSPACE_ADMIN");
       }
 
       // Current owner -> admin
@@ -106,21 +104,20 @@ export const transferWorkspaceOwnership = async (req, res) => {
 
     // Audit AFTER successful transaction
     const [performedUser] = await db
-          .select({
-            name: users.name,
-          })
-          .from(users)
-          .where(eq(users.id, req.user.id));
-                 // Create audit log ONLY after successful update
-      
-        /* audit log activity */
-      const auditLog= await createAuditLog({
+      .select({
+        name: users.name,
+      })
+      .from(users)
+      .where(eq(users.id, req.user.id));
+    // Create audit log ONLY after successful update
+
+    /* audit log activity */
+    const auditLog = await createAuditLog({
       performedBy: currentOwnerId,
       action: "Transfer ownership",
       affectedUser: newOwnerId,
       message: `${performedUser.name} transfer ownership .`,
     });
-    
 
     return res.status(200).json({
       success: true,
@@ -145,15 +142,13 @@ export const transferWorkspaceOwnership = async (req, res) => {
       case "NOT_WORKSPACE_OWNER":
         return res.status(403).json({
           success: false,
-          message:
-            "Only the workspace owner can transfer ownership",
+          message: "Only the workspace owner can transfer ownership",
         });
 
       case "OWNER_MEMBERSHIP_NOT_FOUND":
         return res.status(409).json({
           success: false,
-          message:
-            "Current owner membership is inconsistent",
+          message: "Current owner membership is inconsistent",
         });
 
       case "NEW_OWNER_MUST_BE_EXISTING_WORKSPACE_ADMIN":
@@ -166,8 +161,7 @@ export const transferWorkspaceOwnership = async (req, res) => {
       default:
         return res.status(500).json({
           success: false,
-          message:
-            "Failed to transfer workspace ownership",
+          message: "Failed to transfer workspace ownership",
           error: error.message,
         });
     }

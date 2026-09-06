@@ -1,11 +1,11 @@
-import { db } from '#config/client.js';
-import { users, workspace } from '#drizzle/schema.js';
-import { eq } from 'drizzle-orm';
-import { createAuditLog } from '#controllers/auditLogs.js';
+import { db } from "#config/client.js";
+import { users, workspace } from "#drizzle/schema.js";
+import { eq } from "drizzle-orm";
+import { createAuditLog } from "#controllers/auditLogs.js";
 
 export async function updateWorkspace(req, res) {
   const userId = req.user.id;
-  const { workspaceId } = req.query;
+  const { workspaceId } = req.params;
   const workspaceName = req.body.workspaceName;
 
   try {
@@ -13,11 +13,12 @@ export async function updateWorkspace(req, res) {
     const workSpace = await db
       .select({
         workspaceId: workspace.id,
-        workspace_name: workspace.workspaceName,
+        // workspace_name: workspace.workspaceName,
       })
       .from(workspace)
       .where(eq(workspace.id, workspaceId));
-
+    console.log(workspaceId);
+    console.log(workspaceName);
     if (workSpace.length === 0) {
       return res.status(404).json({
         message: "Workspace doesn't exist.",
@@ -51,7 +52,6 @@ export async function updateWorkspace(req, res) {
     return res.status(200).json({
       message: `Workspace name updated to ${workspaceName} successfully`,
     });
-
   } catch (error) {
     console.log("Update workspace name Error:", error);
 

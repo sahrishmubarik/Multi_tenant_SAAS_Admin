@@ -73,19 +73,20 @@ export async function signup(req, res) {
         email: users.email,
       });
 
-      console.log(`new`, newUser)
+    console.log(`new`, newUser);
     /* activity history  */
     const auditResult = await createAuditLog({
       performedBy: newUser.id,
       action: "Create Account",
       affectedUser: newUser.id,
-      message:`${newUser.name} created account successfully.`
+      message: `${newUser.name} created account successfully.`,
     });
     // Send verification email
     // await generateAndSendToken(newUser.email, "EMAIL_VERIFICATION");
 
     /* successful request confirmation */
-    return res.status(201).json({ message: "Signup successful" ,
+    return res.status(201).json({
+      message: "Signup successful",
       // audit:auditResult
     });
   } catch (error) {

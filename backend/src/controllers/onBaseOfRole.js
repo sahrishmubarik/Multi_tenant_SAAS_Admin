@@ -14,7 +14,7 @@ export async function getMemberOnBaseOfRole(req, res) {
       });
     }
     // your array of allowed roles
-    const allowedRoles = ["admin", "editor", "viewer"];
+    const allowedRoles = ["admin", "editor", "viewer", "owner"];
 
     //  Check if the input role is NOT included in the array
     if (!allowedRoles.includes(role)) {

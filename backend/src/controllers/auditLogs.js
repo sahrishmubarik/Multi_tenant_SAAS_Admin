@@ -1,4 +1,3 @@
-
 import { db } from "#config/client.js";
 import { auditLog } from "#drizzle/schema.js";
 
@@ -13,7 +12,7 @@ export const createAuditLog = async ({
     const [result] = await db
       .insert(auditLog)
       .values({
-         workspaceId,
+        workspaceId,
         performedBy,
         action,
         affectedUser,

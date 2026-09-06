@@ -9,11 +9,7 @@ export async function changePassword(req, res) {
   try {
     const userId = req.user.id;
 
-    const {
-      old_password,
-      new_password,
-      confirm_password,
-    } = req.body;
+    const { old_password, new_password, confirm_password } = req.body;
 
     /* Apply validation to new password */
     const validation = changePasswordValidation.safeParse({
@@ -46,10 +42,7 @@ export async function changePassword(req, res) {
     const user = userResult[0];
 
     /* Check old password */
-    const oldPasswordValid = await bcrypt.compare(
-      old_password,
-      user.password,
-    );
+    const oldPasswordValid = await bcrypt.compare(old_password, user.password);
 
     if (!oldPasswordValid) {
       return res.status(401).json({
@@ -86,7 +79,6 @@ export async function changePassword(req, res) {
       success: true,
       message: "Password changed successfully!",
     });
-
   } catch (error) {
     console.error("Change password error:", error);
 

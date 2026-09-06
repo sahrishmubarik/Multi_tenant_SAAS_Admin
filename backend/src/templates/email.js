@@ -1,4 +1,3 @@
-
 export function resetPasswordEmail(token) {
   const resetLink = `${process.env.BASE_URL}/reset-password?token=${encodeURIComponent(token)}`;
 
@@ -156,11 +155,9 @@ export function resetPasswordEmail(token) {
   `;
 }
 
-
 export function verificationEmail(token) {
-  console.log(`token`,token)
-  const verificationLink =
-    `${process.env.BASE_URL}/verify-email?token=${encodeURIComponent(token)}`;
+  console.log(`token`, token);
+  const verificationLink = `${process.env.BASE_URL}/verify-email?token=${encodeURIComponent(token)}`;
 
   return `
   <!DOCTYPE html>
@@ -196,7 +193,7 @@ export function verificationEmail(token) {
               <table cellpadding="0" cellspacing="0" border="0" align="center" role="presentation">
                 <tr>
                   <td align="center" bgcolor="#4f46e5" style="border-radius:8px;">
-                    <a href="${verificationLink }" target="_blank" style="display:inline-block; padding:14px 28px; color:#ffffff; background-color:#4f46e5; border-radius:8px; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:20px; font-weight:700; text-decoration:none;">
+                    <a href="${verificationLink}" target="_blank" style="display:inline-block; padding:14px 28px; color:#ffffff; background-color:#4f46e5; border-radius:8px; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:20px; font-weight:700; text-decoration:none;">
                       VERIFY EMAIL
                     </a>
                   </td>
@@ -230,7 +227,6 @@ export function verificationEmail(token) {
     
   `;
 }
-
 
 // export function verificationEmail(token) {
 //   const verificationLink = `http://localhost:3000/api/auth/verify-email?token=${encodeURIComponent(token)}`;
@@ -389,11 +385,9 @@ export function verificationEmail(token) {
 //   `;
 // }
 
-
 /* Workspace invitation email */
 export function invitationEmail(token, workspaceName) {
-const invitationLink =
-  `${process.env.BASE_URL}/accept-invitation/accept?token=${encodeURIComponent(token)}`;
+  const invitationLink = `${process.env.BASE_URL}/accept-invitation/accept?token=${encodeURIComponent(token)}`;
   return `
 <!DOCTYPE html>
 <html>

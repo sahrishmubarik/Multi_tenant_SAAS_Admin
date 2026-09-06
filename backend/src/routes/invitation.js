@@ -25,15 +25,15 @@ invitation.get("/details",getInvitationDetails);
 
 // LOGGED-IN USER
 // User invitation accept 
-invitation.post("/accept",authMiddleware, acceptInvitation);
+invitation.post("/accept", authMiddleware,acceptInvitation);
 
 
 // Admin/Owner
-invitation.post( "/revoke", authMiddleware,revokeInvitation);
+invitation.post( "/revoke", authMiddleware,ownerOrAdminMiddleware,revokeInvitation);
 // Admin/Owner
 invitation.post( "/:workspaceId", authMiddleware,ownerOrAdminMiddleware, createInvitation);
 
 // Owner
-invitation.get( "/status/:workspaceId",authMiddleware, ownerMiddleware, checkInvitationStatus);
+invitation.get( "/status/:workspaceId",authMiddleware, ownerOrAdminMiddleware, checkInvitationStatus);
 
 export default invitation;

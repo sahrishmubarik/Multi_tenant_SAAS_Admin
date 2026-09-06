@@ -1,4 +1,3 @@
-
 import { db } from "#config/client.js";
 import { users } from "#drizzle/schema.js";
 import { eq } from "drizzle-orm";
@@ -40,10 +39,7 @@ export async function resetPassword(req, res) {
     }
 
     // Check token expiry
-    if (
-      !user[0].tokenExpiresAt ||
-      user[0].tokenExpiresAt < new Date()
-    ) {
+    if (!user[0].tokenExpiresAt || user[0].tokenExpiresAt < new Date()) {
       return res.status(400).json({
         error: "Invalid or expired token",
       });

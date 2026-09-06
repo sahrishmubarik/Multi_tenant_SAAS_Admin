@@ -39,10 +39,10 @@ export async function checkInvitationStatus(req, res) {
       .where(
         and(
           eq(invitations.workspaceId, workspaceId),
-          eq(invitations.status, status)
-        )
+          eq(invitations.status, status),
+        ),
       );
-      console.log(checkStatus);
+    console.log(checkStatus);
     return res.status(200).json({
       message: "Status fetched successfully",
       count: checkStatus.length,

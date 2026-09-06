@@ -1,4 +1,3 @@
-
 import { db } from "#config/client.js";
 import { workspaceMembers, users } from "#drizzle/schema.js";
 import { eq, and } from "drizzle-orm";
@@ -64,21 +63,21 @@ export async function workSpaceMembers(req, res) {
       role,
       assignedBy: req.user.id,
     });
-      const [performedUser] = await db
+    const [performedUser] = await db
       .select({
         name: users.name,
       })
       .from(users)
       .where(eq(users.id, req.user.id));
-             // Create audit log ONLY after successful update
-  
+    // Create audit log ONLY after successful update
+
     /* audit log activity */
-  const auditResult= await createAuditLog({
-  performedBy: req.user.id,
-  action: "Role Update",
-  affectedUser: member.userId,
-  message: `${performedUser.name} add new member  ${memberName} and has assigned a ${role} in workspace .`,
-});
+    const auditResult = await createAuditLog({
+      performedBy: req.user.id,
+      action: "Role Update",
+      affectedUser: member.userId,
+      message: `${performedUser.name} add new member  ${memberName} and has assigned a ${role} in workspace .`,
+    });
 
     return res.status(201).json({
       success: true,

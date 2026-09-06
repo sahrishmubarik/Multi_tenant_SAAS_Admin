@@ -24,7 +24,7 @@ const workspace = express.Router();
 
 workspace.post("/",authMiddleware, workspaceCreate);
 workspace.get("/my-workspaces",authMiddleware, getMyWorkspace);
-workspace.patch("/update/:workspaceId",authMiddleware, ownerMiddleware, updateWorkspace);
+workspace.patch("/:workspaceId",authMiddleware, ownerMiddleware, updateWorkspace);
 
 workspace.delete("/",authMiddleware, ownerMiddleware, deleteWorkspace);
 /* member delete itself from the workspace */
@@ -47,3 +47,6 @@ workspace.delete("/member/:memberId", authMiddleware, ownerOrAdminMiddleware, de
 workspace.get("/activity/:workspaceId", authMiddleware, getActivity);
 
 export default workspace;
+
+        
+      

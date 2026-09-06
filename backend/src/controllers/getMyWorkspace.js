@@ -1,6 +1,6 @@
-import { db } from '#config/client.js';
-import { workspace, workspaceMembers } from '#drizzle/schema.js';
-import { eq } from 'drizzle-orm';
+import { db } from "#config/client.js";
+import { workspace, workspaceMembers } from "#drizzle/schema.js";
+import { eq } from "drizzle-orm";
 
 export async function getMyWorkspace(req, res) {
   try {
@@ -14,23 +14,19 @@ export async function getMyWorkspace(req, res) {
         createdAt: workspace.createdAt,
       })
       .from(workspaceMembers)
-      .innerJoin(
-        workspace,
-        eq(workspaceMembers.workspaceId, workspace.id)
-      )
+      .innerJoin(workspace, eq(workspaceMembers.workspaceId, workspace.id))
       .where(eq(workspaceMembers.userId, userId));
 
     return res.status(200).json({
-      message: 'Workspaces fetched successfully',
+      message: "Workspaces fetched successfully",
       count: myWorkspaces.length,
       workspaces: myWorkspaces,
     });
-
   } catch (error) {
-    console.log('Get My Workspaces Error:', error);
+    console.log("Get My Workspaces Error:", error);
 
     return res.status(500).json({
-      message: 'Failed to fetch workspaces',
+      message: "Failed to fetch workspaces",
       error: error.message,
     });
   }

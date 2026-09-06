@@ -1,6 +1,17 @@
 import {
-  uuid,integer,text, unique,pgTable,serial,varchar,timestamp, boolean, pgEnum, uniqueIndex,index} 
-  from "drizzle-orm/pg-core";
+  uuid,
+  integer,
+  text,
+  unique,
+  pgTable,
+  serial,
+  varchar,
+  timestamp,
+  boolean,
+  pgEnum,
+  uniqueIndex,
+  index,
+} from "drizzle-orm/pg-core";
 /* User Table */
 export const users = pgTable(
   "users",
@@ -23,9 +34,7 @@ export const users = pgTable(
   (table) => {
     return {
       // 2.  unique index apply
-      emailUniqueIdx: uniqueIndex("users_email_unique_idx").on(table.email)
-  
-
+      emailUniqueIdx: uniqueIndex("users_email_unique_idx").on(table.email),
     };
   },
 );
@@ -93,12 +102,14 @@ export const invitations = pgTable(
 
     email: varchar("email", { length: 100 }).notNull(),
 
-    invitedBy: uuid("invited_by").notNull().references(() => users.id),
+    invitedBy: uuid("invited_by")
+      .notNull()
+      .references(() => users.id),
     token: varchar("token", { length: 255 }).notNull(), // Removed inline .unique() to use explicit index below
-   status: varchar("status", { length: 20 }).notNull().default("PENDING"),
-   revoke: boolean("revoke").notNull().default(false),
- expiresAt: timestamp("expires_at").notNull(),
-createdAt: timestamp("created_at").defaultNow().notNull(),
+    status: varchar("status", { length: 20 }).notNull().default("PENDING"),
+    revoke: boolean("revoke").notNull().default(false),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => {
     return {
@@ -128,15 +139,14 @@ createdAt: timestamp("created_at").defaultNow().notNull(),
   },
 );
 
-export const auditLog=pgTable("auditLog",{
-  id:uuid("id").defaultRandom().primaryKey(),
-  performedBy:uuid("performed_by").notNull(),
+export const auditLog = pgTable("auditLog", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  performedBy: uuid("performed_by").notNull(),
   // What action was performed
   action: varchar("action", { length: 100 }).notNull(),
- // Whom / what was affected
+  // Whom / what was affected
   affectedUser: uuid("affected_user"),
   message: text("message").notNull(),
   // When the action happened
-  createdAt: timestamp("created_at") .defaultNow() .notNull(),
-
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

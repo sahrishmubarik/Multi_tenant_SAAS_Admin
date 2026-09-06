@@ -1,4 +1,3 @@
-
 import { db } from "#config/client.js";
 import { users, workspaceMembers } from "#drizzle/schema.js";
 import { eq, and } from "drizzle-orm";
@@ -63,10 +62,7 @@ export async function getWorkspaceMembers(req, res) {
         createAt: workspaceMembers.createdAt,
       })
       .from(workspaceMembers)
-      .leftJoin(
-        users,
-        eq(workspaceMembers.userId, users.id)
-      )
+      .leftJoin(users, eq(workspaceMembers.userId, users.id))
       .where(queryCondition);
 
     return res.status(200).json({
@@ -83,9 +79,6 @@ export async function getWorkspaceMembers(req, res) {
     });
   }
 }
-
-
-
 
 // import { db } from "#config/client.js";
 // import { users, workspaceMembers } from "#drizzle/schema.js";
