@@ -1,9 +1,6 @@
 import { useState } from "react";
 
-export default function AddMemberCard({
-  workspaceId,
-  onMemberAdded,
-}) {
+export default function AddMemberCard({ workspaceId, onMemberAdded }) {
   const [formData, setFormData] = useState({
     memberName: "",
     email: "",
@@ -23,11 +20,11 @@ export default function AddMemberCard({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if(!formData.memberName){
+    if (!formData.memberName) {
       setError("Member Name is required");
       return;
     }
-    if(!formData.email){
+    if (!formData.email) {
       setError("Member email is required");
       return;
     }
@@ -39,20 +36,17 @@ export default function AddMemberCard({
 
       const token = localStorage.getItem("token");
 
-      const response = await fetch(
-        "/api/v1/workspace/member",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...formData,
-            workspaceId,
-          }),
-        }
-      );
+      const response = await fetch("/api/v1/workspace/member", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          workspaceId,
+        }),
+      });
 
       const data = await response.json();
 
@@ -69,7 +63,6 @@ export default function AddMemberCard({
       });
 
       onMemberAdded();
-
     } catch (error) {
       setError(error.message);
     } finally {
@@ -79,11 +72,8 @@ export default function AddMemberCard({
 
   return (
     <div className="mt-8 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
-
       <div className="border-b border-[#e7e7e5] px-5 py-4">
-        <h2 className="text-[15px] font-semibold text-[#17181a]">
-          Add member
-        </h2>
+        <h2 className="text-[15px] font-semibold text-[#17181a]">Add member</h2>
 
         <p className="mt-1 text-[13px] text-[#66686d]">
           Add an existing RoleBase user directly to this workspace.
@@ -91,7 +81,6 @@ export default function AddMemberCard({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5 px-5 py-5">
-
         {/* Member Name */}
         <div>
           <label className="mb-2 block text-[13px] font-medium text-[#252629]">
@@ -166,7 +155,6 @@ export default function AddMemberCard({
             {loading ? "Adding..." : "Add member"}
           </button>
         </div>
-
       </form>
     </div>
   );

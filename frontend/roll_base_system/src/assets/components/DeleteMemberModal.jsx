@@ -5,6 +5,7 @@ export default function DeleteMemberModal({
   workspaceId,
   onClose,
   onSuccess,
+  onShowToast,
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,7 +37,7 @@ export default function DeleteMemberModal({
       if (!response.ok) {
         throw new Error(data.message || "Failed to delete member");
       }
-
+      onShowToast("Member delete successfully!");
       onSuccess();
     } catch (error) {
       console.error("Delete member error:", error);
@@ -48,7 +49,7 @@ export default function DeleteMemberModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-[420px] overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
+      <div className="w-full max-w-[300px] overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
         <div className="px-5 py-5">
           <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-danger-bg)] text-[var(--color-danger)]">
             !

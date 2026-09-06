@@ -15,51 +15,56 @@ export default function AcceptInvitation() {
     const loadInvitation = async () => {
       try {
         if (!token) {
+          console.log("token dose not exist");
           throw new Error("Invitation token is missing");
         }
 
         // IMPORTANT:
         // Save token so it survives login/signup
-        sessionStorage.setItem(
-          "invitationToken",
-          token
-        );
+        sessionStorage.setItem("invitationToken", token);
 
         const response = await fetch(
-          `/api/v1/workspace-invitation/details?token=${encodeURIComponent(token)}`
+          `/api/v1/workspace-invitation/details?token=${encodeURIComponent(token)}`,
         );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            data.message || "Invalid invitation"
-          );
+          throw new Error(data.message || "Invalid invitation");
         }
 
         setInvitation(data.invitation);
 
         const authToken = localStorage.getItem("token");
 
+        console.log(authToken);
         // User is already logged in
         if (authToken) {
-          await acceptInvitation(authToken);
-          return;
+          try {
+            await acceptInvitation(authToken);
+            return;
+          } catch (error) {
+            if (error.message === "Invalid or expired token") {
+              localStorage.removeItem("token");
+            } else {
+              throw error;
+            }
+          }
         }
-
         // User is NOT logged in
         if (data.userExists) {
           navigate(
-            `/login?workspace-invitationToken=${encodeURIComponent(token)}`
+            `/login?workspace-invitationToken=${encodeURIComponent(token)}`,
           );
+          acceptInvitation(authToken);
         } else {
           navigate(
-            `/signup?workspace-invitationToken=${encodeURIComponent(token)}`
+            `/signup?workspace-invitationToken=${encodeURIComponent(token)}`,
           );
+          acceptInvitation(authToken);
         }
-
       } catch (error) {
-        console.error("Invitation error:", error);
+        // console.error("Invitation error:", {error});
         setError(error.message);
         setLoading(false);
       }
@@ -76,24 +81,20 @@ export default function AcceptInvitation() {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
-      }
+      },
     );
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        data.message || "Failed to accept invitation"
-      );
+      throw new Error(data.message || "Failed to accept invitation");
     }
 
     // Token is no longer needed
     sessionStorage.removeItem("invitationToken");
 
     // Go to member/workspace page
-    navigate(
-      `/dashboard/members`
-    );
+    navigate(`/dashboard/members`);
   };
 
   if (loading) {
@@ -108,13 +109,9 @@ export default function AcceptInvitation() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="rounded-lg border p-6">
-          <h2 className="text-lg font-semibold">
-            Invitation Error
-          </h2>
+          <h2 className="text-lg font-semibold">Invitation Error</h2>
 
-          <p className="mt-2 text-red-500">
-            {error}
-          </p>
+          <p className="mt-2 text-red-500">{error}</p>
         </div>
       </div>
     );

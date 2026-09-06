@@ -28,7 +28,7 @@ export default function Index() {
 
           <div className="mt-5 flex items-center justify-center gap-4">
             <a href="/signup" className="btn-primary px-5 py-2">
-              Get Started 
+              Get Started
             </a>
 
             <a
@@ -36,7 +36,6 @@ export default function Index() {
               className="btn-secondary group text-[#67696e] hover:text-white"
             >
               Login
-            
             </a>
           </div>
         </div>

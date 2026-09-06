@@ -7,7 +7,7 @@ import {
   emailSchema,
   passwordSchema,
   loginSchema,
-  forgotPasswordSchema,
+  // forgotPasswordSchema,
 } from "../../validations/validation.js";
 
 export default function LoginCard() {
@@ -212,65 +212,65 @@ export default function LoginCard() {
      FORGOT PASSWORD
   ========================= */
 
-  async function handleForgotPassword(event) {
-    event.preventDefault();
+  // async function handleForgotPassword(event) {
+  //   event.preventDefault();
 
-    setError("");
-    setMessage("");
-    setToast("");
+  //   setError("");
+  //   setMessage("");
+  //   setToast("");
 
-    /* =========================
-       VALIDATE EMAIL ONLY
-    ========================= */
+  //   /* =========================
+  //      VALIDATE EMAIL ONLY
+  //   ========================= */
 
-    const result = forgotPasswordSchema.safeParse({
-      email: formData.email,
-    });
+  //   const result = forgotPasswordSchema.safeParse({
+  //     email: formData.email,
+  //   });
 
-    if (!result.success) {
-      setError(result.error.issues[0].message);
+  //   if (!result.success) {
+  //     setError(result.error.issues[0].message);
 
-      return;
-    }
+  //     return;
+  //   }
 
-    setLoading(true);
+  //   setLoading(true);
 
-    try {
-      const response = await fetch("/api/v1/auth/forget-password", {
-        method: "POST",
+  //   try {
+  //     const response = await fetch("/api/v1/auth/forget-password", {
+  //       method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
 
-        body: JSON.stringify(result.data),
-      });
+  //       body: JSON.stringify(result.data),
+  //     });
 
-      const data = await response.json();
+  //     const data = await response.json();
 
-      /* =========================
-         BACKEND ERROR
-      ========================= */
+  //     /* =========================
+  //        BACKEND ERROR
+  //     ========================= */
 
-      if (!response.ok) {
-        setError(data.message || "Something went wrong.");
+  //     if (!response.ok) {
+  //       setError(data.message || "Something went wrong.");
 
-        return;
-      }
+  //       return;
+  //     }
 
-      /* =========================
-         FORGOT PASSWORD SUCCESS
-      ========================= */
+  //     /* =========================
+  //        FORGOT PASSWORD SUCCESS
+  //     ========================= */
 
-      setMessage("Reset link sent to your email!");
-    } catch (error) {
-      console.error("Forgot password error:", error);
+  //     setMessage("Reset link sent to your email!");
+  //   } catch (error) {
+  //     console.error("Forgot password error:", error);
 
-      setError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  //     setError("Network error. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
   return (
     <div className="relative flex items-center bg-[#E5EEE4] px-6 mt-4">
@@ -282,16 +282,18 @@ export default function LoginCard() {
         <div
           className="
             fixed
-            top-5
-            right-5
+            right-6
+            top-6
             z-50
             rounded-lg
-            bg-[var(--color-success)]
+            border
+            border-[var(--color-success-border)]
+            bg-[var(--color-success-bg)]
             px-5
             py-3
             text-sm
             font-medium
-            text-white
+            text-[var(--color-success)]
             shadow-lg
           "
         >
@@ -473,6 +475,20 @@ export default function LoginCard() {
           <div className="text-right">
             <button
               type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="
+    cursor-pointer
+    text-sm
+    text-[var(--color-primary)]
+    transition-colors
+    hover:text-[var(--color-primary-hover)]
+    hover:underline
+  "
+            >
+              Forgot password?
+            </button>
+            {/* <button
+              type="button"
               onClick={handleForgotPassword}
               disabled={loading}
               className="
@@ -487,7 +503,7 @@ export default function LoginCard() {
               "
             >
               {loading ? "Sending..." : "Forgot?"}
-            </button>
+            </button> */}
           </div>
 
           {/* =========================

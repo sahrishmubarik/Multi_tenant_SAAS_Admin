@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars} from "@fortawesome/free-solid-svg-icons";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 
 import Sidebar from "../assets/components/Sidebar";
 
@@ -10,7 +10,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
-
       {/* Mobile Header */}
       <header
         className="
@@ -30,14 +29,10 @@ export default function DashboardPage() {
             hover:bg-[var(--color-surface-alt)]
           "
         >
-          <FontAwesomeIcon
-            icon={sidebarOpen ? faXmark : faBars}
-          />
+          <FontAwesomeIcon icon={sidebarOpen ? faXmark : faBars} />
         </button>
 
-        <span className="ml-3 text-[16px] font-semibold">
-          RoleBase
-        </span>
+        <span className="ml-3 text-[16px] font-semibold">RoleBase</span>
       </header>
 
       {/* Mobile overlay */}
@@ -53,10 +48,7 @@ export default function DashboardPage() {
       )}
 
       {/* Sidebar */}
-      <Sidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main content */}
       <main
@@ -69,7 +61,6 @@ export default function DashboardPage() {
       >
         <Outlet />
       </main>
-
     </div>
   );
 }

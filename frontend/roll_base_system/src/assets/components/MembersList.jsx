@@ -6,10 +6,13 @@ function RoleBadge({ role }) {
   const roleStyles = {
     owner:
       "bg-[var(--color-role-owner-bg)] text-[var(--color-role-owner)]",
+
     admin:
       "bg-[var(--color-role-admin-bg)] text-[var(--color-role-admin)]",
+
     editor:
       "bg-[var(--color-role-editor-bg)] text-[var(--color-role-editor)]",
+
     viewer:
       "bg-[var(--color-role-member-bg)] text-[var(--color-role-member)]",
   };
@@ -27,36 +30,21 @@ function RoleBadge({ role }) {
 }
 
 export default function MembersList({
-  members,
-  loading,
+  members = [],
+  loading = false,
   workspaceId,
+  roleFilter = "all",
+  onRoleFilterChange,
   onMemberChanged,
+  onShowToast,
 }) {
   const [deleteMember, setDeleteMember] = useState(null);
-
-  // Top filter
-  const [roleFilter, setRoleFilter] = useState("ALL");
 
   // Which member is currently being updated
   const [updatingMemberId, setUpdatingMemberId] = useState(null);
 
   // Error from update role API
   const [roleError, setRoleError] = useState("");
-
-  /*
-   * FILTER MEMBERS
-   *
-   * This dropdown only filters the list.
-   *
-   * It does NOT change anyone's role.
-   */
-  const filteredMembers =
-    roleFilter === "ALL"
-      ? members
-      : members.filter(
-          (member) =>
-            member.role?.toUpperCase() === roleFilter
-        );
 
   /*
    * UPDATE MEMBER ROLE
@@ -86,15 +74,15 @@ export default function MembersList({
       setRoleError("");
       setUpdatingMemberId(member.memberId);
 
-      /*
-       * IMPORTANT:
-       *
-       * Change this URL/body if your backend update-role
-       * endpoint uses a different route or field names.
-       */
+      console.log(
+        "Updating role for member:",
+        member.memberId,
+        "to",
+        newRole
+      );
+
       const response = await fetch(
         `/api/v1/workspace/${workspaceId}/members/${member.memberId}/role`,
-        
         {
           method: "PATCH",
           headers: {
@@ -106,7 +94,7 @@ export default function MembersList({
           }),
         }
       );
-    console.log("Updating role for member:", member.memberId, "to", newRole);
+
       const data = await response.json();
 
       console.log("Update role response:", data);
@@ -118,11 +106,22 @@ export default function MembersList({
       }
 
       /*
-       * Refresh members after successful update.
+       * Refresh members from backend.
+       *
+       * Important:
+       * If Admin filter is selected, this will call:
+       *
+       * GET /members/role/admin
+       *
+       * If All is selected, it will call:
+       *
+       * GET /members
        */
+      // SUCCESS
+onShowToast("Member role updated successfully!");
       onMemberChanged();
     } catch (error) {
-      // console.error("Update member role error:", {error});
+      console.error("Update member role error:", error);
 
       setRoleError(error.message);
     } finally {
@@ -135,7 +134,37 @@ export default function MembersList({
    */
   function handleDeleteSuccess() {
     setDeleteMember(null);
+
+    /*
+     * Refresh members from backend
+     * using currently selected role.
+     */
     onMemberChanged();
+  }
+
+  /*
+   * ROLE FILTER CHANGE
+   *
+   * We DON'T filter members here.
+   *
+   * Parent component will call:
+   *
+   * ALL:
+   * GET /members
+   *
+   * ADMIN:
+   * GET /members/role/admin
+   *
+   * EDITOR:
+   * GET /members/role/editor
+   *
+   * VIEWER:
+   * GET /members/role/viewer
+   */
+  function handleFilterChange(event) {
+    const role = event.target.value;
+
+    onRoleFilterChange(role);
   }
 
   return (
@@ -156,8 +185,7 @@ export default function MembersList({
               </h2>
 
               <p className="mt-1 text-[13px] text-[#66686d]">
-                People who currently have access to this
-                workspace.
+                People who currently have access to this workspace.
               </p>
             </div>
 
@@ -177,14 +205,14 @@ export default function MembersList({
               <select
                 id="member-role-filter"
                 value={roleFilter}
-                onChange={(event) =>
-                  setRoleFilter(event.target.value)
-                }
+                onChange={handleFilterChange}
+                disabled={loading}
                 className="
                   rounded-[8px]
                   border
                   border-[#dededc]
                   bg-white
+                  cursor-pointer
                   px-3
                   py-2
                   text-[12px]
@@ -194,37 +222,36 @@ export default function MembersList({
                   focus:border-[var(--color-primary)]
                   focus:ring-2
                   focus:ring-[var(--color-primary-light)]
+                  disabled:cursor-not-allowed
+                  disabled:opacity-60
                 "
               >
-                <option value="ALL">
+                <option value="all">
                   All
                 </option>
 
-                <option value="OWNER">
+                <option value="owner">
                   Owner
                 </option>
 
-                <option value="ADMIN">
+                <option value="admin">
                   Admin
                 </option>
 
-                <option value="EDITOR">
+                <option value="editor">
                   Editor
                 </option>
 
-                <option value="VIEWER">
+                <option value="viewer">
                   Viewer
                 </option>
               </select>
 
-              {!loading && (
-                <span className="rounded-full bg-[var(--color-surface-alt)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-text-secondary)]">
-                  {filteredMembers.length}{" "}
-                  {filteredMembers.length === 1
-                    ? "member"
-                    : "members"}
-                </span>
-              )}
+             {!loading && (
+  <span className="rounded-full bg-[var(--color-surface-alt)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-text-secondary)]">
+    {members.length} {members.length === 1 ? "member" : "members"}
+  </span>
+)}
 
             </div>
           </div>
@@ -262,38 +289,25 @@ export default function MembersList({
             </p>
 
             <p className="mt-1 text-[12px] text-[#7a7d84]">
-              Add a member or send an invitation to get
-              started.
+              {roleFilter === "all"
+                ? "Add a member or send an invitation to get started."
+                : `No ${roleFilter} members found.`}
             </p>
 
           </div>
         )}
 
         {/* =====================================================
-            NO MEMBERS FOR SELECTED FILTER
-           ===================================================== */}
-
-        {!loading &&
-          members.length > 0 &&
-          filteredMembers.length === 0 && (
-            <div className="px-5 py-10 text-center">
-
-              <p className="text-[14px] font-medium text-[#252629]">
-                No {roleFilter.toLowerCase()} members found
-              </p>
-
-              <p className="mt-1 text-[12px] text-[#7a7d84]">
-                Try selecting another role.
-              </p>
-
-            </div>
-          )}
-
-        {/* =====================================================
             MEMBERS TABLE
+
+            IMPORTANT:
+            No client-side filtering here.
+
+            members already contains the data returned
+            from the backend.
            ===================================================== */}
 
-        {!loading && filteredMembers.length > 0 && (
+        {!loading && members.length > 0 && (
           <div className="overflow-x-auto">
 
             <table className="w-full min-w-[650px]">
@@ -322,7 +336,7 @@ export default function MembersList({
 
               <tbody>
 
-                {filteredMembers.map((member) => (
+                {members.map((member) => (
                   <tr
                     key={member.memberId}
                     className="border-b border-[#eeeeec] last:border-b-0"
@@ -376,8 +390,7 @@ export default function MembersList({
                         <select
                           value={member.role}
                           disabled={
-                            updatingMemberId ===
-                            member.memberId
+                            updatingMemberId === member.memberId
                           }
                           onChange={(event) =>
                             handleRoleChange(
@@ -390,6 +403,7 @@ export default function MembersList({
                             border
                             border-[#dededc]
                             bg-white
+                            cursor-pointer
                             px-3
                             py-1.5
                             text-[12px]
@@ -404,15 +418,24 @@ export default function MembersList({
                           "
                         >
 
-                          <option value="admin">
+                          <option
+                            value="admin"
+                            className="cursor-pointer"
+                          >
                             Admin
                           </option>
 
-                          <option value="editor">
+                          <option
+                            value="editor"
+                            className="cursor-pointer"
+                          >
                             Editor
                           </option>
 
-                          <option value="viewer">
+                          <option
+                            value="viewer"
+                            className="cursor-pointer"
+                          >
                             Viewer
                           </option>
 
@@ -431,6 +454,7 @@ export default function MembersList({
                         ? new Date(
                             member.createAt
                           ).toLocaleDateString()
+                           .replaceAll("/", "-")
                         : "—"}
                     </td>
 
@@ -490,13 +514,13 @@ export default function MembersList({
 
       {/* =========================================================
           DELETE CONFIRMATION MODAL
-          
-          KEEP THIS.
-          You only wanted to remove the role-change modal.
+
+          KEEP THIS
          ========================================================= */}
 
       {deleteMember && (
         <DeleteMemberModal
+         onShowToast={onShowToast}
           member={deleteMember}
           workspaceId={workspaceId}
           onClose={() => setDeleteMember(null)}
@@ -506,6 +530,534 @@ export default function MembersList({
     </>
   );
 }
+
+
+
+// import { useState } from "react";
+// import DeleteMemberModal from "./DeleteMemberModal";
+
+// function RoleBadge({ role }) {
+//   const roleStyles = {
+//     owner:
+//       "bg-[var(--color-role-owner-bg)] text-[var(--color-role-owner)]",
+//     admin:
+//       "bg-[var(--color-role-admin-bg)] text-[var(--color-role-admin)]",
+//     editor:
+//       "bg-[var(--color-role-editor-bg)] text-[var(--color-role-editor)]",
+//     viewer:
+//       "bg-[var(--color-role-member-bg)] text-[var(--color-role-member)]",
+//   };
+
+//   return (
+//     <span
+//       className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${
+//         roleStyles[role] ||
+//         "bg-[var(--color-inherited-bg)] text-[var(--color-inherited)]"
+//       }`}
+//     >
+//       {role?.charAt(0).toUpperCase() + role?.slice(1)}
+//     </span>
+//   );
+// }
+
+// export default function MembersList({
+//   members,
+//   loading,
+//   workspaceId,
+//   onMemberChanged,
+// }) {
+//   const [deleteMember, setDeleteMember] = useState(null);
+
+//   // Top filter
+//   const [roleFilter, setRoleFilter] = useState("ALL");
+
+//   // Which member is currently being updated
+//   const [updatingMemberId, setUpdatingMemberId] = useState(null);
+
+//   // Error from update role API
+//   const [roleError, setRoleError] = useState("");
+
+//   /*
+//    * FILTER MEMBERS
+//    *
+//    * This dropdown only filters the list.
+//    *
+//    * It does NOT change anyone's role.
+//    */
+//   const filteredMembers =
+//     roleFilter === "ALL"
+//       ? members
+//       : members.filter(
+//           (member) =>
+//             member.role?.toUpperCase() === roleFilter
+//         );
+
+//   /*
+//    * UPDATE MEMBER ROLE
+//    *
+//    * This runs directly when the role dropdown
+//    * inside a member row is changed.
+//    */
+
+//   async function getMemberRole(){
+
+
+//   }
+//   async function handleRoleChange(member, newRole) {
+//     // Don't allow owner role to be changed
+//     if (member.role === "owner") {
+//       return;
+//     }
+
+//     // If user selects the same role, do nothing
+//     if (member.role === newRole) {
+//       return;
+//     }
+
+//     const token = localStorage.getItem("token");
+
+//     if (!token) {
+//       setRoleError("Authorization token is required.");
+//       return;
+//     }
+
+//     try {
+//       setRoleError("");
+//       setUpdatingMemberId(member.memberId);
+
+//       /*
+//        * IMPORTANT:
+//        *
+//        * Change this URL/body if your backend update-role
+//        * endpoint uses a different route or field names.
+//        */
+//       const response = await fetch(
+//         `/api/v1/workspace/${workspaceId}/members/${member.memberId}/role`,
+        
+        
+//         {
+//           method: "PATCH",
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             "Content-Type": "application/json",
+//           },
+//           body: JSON.stringify({
+//             role: newRole,
+//           }),
+//         }
+//       );
+//     console.log("Updating role for member:", member.memberId, "to", newRole);
+//       const data = await response.json();
+
+//       console.log("Update role response:", data);
+
+//       if (!response.ok) {
+//         throw new Error(
+//           data.message || "Failed to update member role."
+//         );
+//       }
+
+//       /*
+//        * Refresh members after successful update.
+//        */
+//       onMemberChanged();
+//     } catch (error) {
+//       // console.error("Update member role error:", {error});
+
+//       setRoleError(error.message);
+//     } finally {
+//       setUpdatingMemberId(null);
+//     }
+//   }
+
+//   /*
+//    * DELETE SUCCESS
+//    */
+//   function handleDeleteSuccess() {
+//     setDeleteMember(null);
+//     onMemberChanged();
+//   }
+
+//   return (
+//     <>
+//       <div className="mt-6 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
+
+//         {/* =====================================================
+//             HEADER
+//            ===================================================== */}
+
+//         <div className="border-b border-[#e7e7e5] px-5 py-4">
+
+//           <div className="flex items-center justify-between gap-4">
+
+//             <div>
+//               <h2 className="text-[15px] font-semibold text-[#17181a]">
+//                 Members
+//               </h2>
+
+//               <p className="mt-1 text-[13px] text-[#66686d]">
+//                 People who currently have access to this
+//                 workspace.
+//               </p>
+//             </div>
+
+//             {/* =================================================
+//                 TOP ROLE FILTER
+//                ================================================= */}
+
+//             <div className="flex items-center gap-2">
+
+//               <label
+//                 htmlFor="member-role-filter"
+//                 className="sr-only"
+//               >
+//                 Filter members by role
+//               </label>
+
+//               <select
+//                 id="member-role-filter"
+//                 value={roleFilter}
+//                 // onChange={(event) =>
+//                 //   setRoleFilter(event.target.value)
+//                 // }
+//                 onChange={setRoleFilter(getMemberRole)}
+//                 className="
+//                   rounded-[8px]
+//                   border
+//                   border-[#dededc]
+//                   bg-white
+//                   cursor-pointer
+//                   px-3
+//                   py-2
+//                   text-[12px]
+//                   font-medium
+//                   text-[#252629]
+//                   outline-none
+//                   focus:border-[var(--color-primary)]
+//                   focus:ring-2
+//                   focus:ring-[var(--color-primary-light)]
+//                 "
+//               >
+//                 <option value="ALL" className="cursor-pointer">
+//                   All
+//                 </option>
+
+//                 <option value="OWNER" className="cursor-pointer">
+//                   Owner
+//                 </option>
+
+//                 <option value="ADMIN" className="cursor-pointer">
+//                   Admin
+//                 </option>
+
+//                 <option value="EDITOR" className="cursor-pointer">
+//                   Editor
+//                 </option>
+
+//                 <option value="VIEWER" className="cursor-pointer">
+//                   Viewer
+//                 </option>
+//               </select>
+
+//               {!loading && (
+//                 <span className="rounded-full bg-[var(--color-surface-alt)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-text-secondary)]">
+//                   {filteredMembers.length}{" "}
+//                   {filteredMembers.length === 1
+//                     ? "member"
+//                     : "members"}
+//                 </span>
+//               )}
+
+              // {!loading && (
+              //   <span className="rounded-full bg-[var(--color-surface-alt)] px-2.5 py-1 text-[11px] font-medium text-[var(--color-text-secondary)]">
+              //     {members.length}{" "}
+              //     {members.length === 1
+              //       ? "member"
+              //       : "members"}
+              //   </span>
+              // )}
+
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* =====================================================
+//             ROLE UPDATE ERROR
+//            ===================================================== */}
+
+//         {roleError && (
+//           <div className="mx-5 mt-4 rounded-[8px] bg-[var(--color-danger-bg)] px-3 py-2 text-[12px] text-[var(--color-danger)]">
+//             {roleError}
+//           </div>
+//         )}
+
+//         {/* =====================================================
+//             LOADING
+//            ===================================================== */}
+
+//         {loading && (
+//           <div className="px-5 py-10 text-center text-[13px] text-[#7a7d84]">
+//             Loading members...
+//           </div>
+//         )}
+
+//         {/* =====================================================
+//             NO MEMBERS
+//            ===================================================== */}
+
+//         {!loading && members.length === 0 && (
+//           <div className="px-5 py-10 text-center">
+
+//             <p className="text-[14px] font-medium text-[#252629]">
+//               No members found
+//             </p>
+
+//             <p className="mt-1 text-[12px] text-[#7a7d84]">
+//               Add a member or send an invitation to get
+//               started.
+//             </p>
+
+//           </div>
+//         )}
+
+//         {/* =====================================================
+//             NO MEMBERS FOR SELECTED FILTER
+//            ===================================================== */}
+
+//         {!loading &&
+//           members.length > 0 &&
+//           filteredMembers.length === 0 && (
+//             <div className="px-5 py-10 text-center">
+
+//               <p className="text-[14px] font-medium text-[#252629]">
+//                 No {roleFilter.toLowerCase()} members found
+//               </p>
+
+//               <p className="mt-1 text-[12px] text-[#7a7d84]">
+//                 Try selecting another role.
+//               </p>
+
+//             </div>
+//           )}
+
+//         {/* =====================================================
+//             MEMBERS TABLE
+//            ===================================================== */}
+
+//         {!loading && filteredMembers.length > 0 && (
+//           <div className="overflow-x-auto">
+
+//             <table className="w-full min-w-[650px]">
+
+//               <thead>
+//                 <tr className="border-b border-[#e7e7e5] bg-[#fafafa]">
+
+//                   <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7a7d84]">
+//                     Member
+//                   </th>
+
+//                   <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7a7d84]">
+//                     Role
+//                   </th>
+
+//                   <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7a7d84]">
+//                     Joined
+//                   </th>
+
+//                   <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-[#7a7d84]">
+//                     Actions
+//                   </th>
+
+//                 </tr>
+//               </thead>
+
+//               <tbody>
+
+//                 {filteredMembers.map((member) => (
+//                   <tr
+//                     key={member.memberId}
+//                     className="border-b border-[#eeeeec] last:border-b-0"
+//                   >
+
+//                     {/* =================================================
+//                         MEMBER
+//                        ================================================= */}
+
+//                     <td className="px-5 py-4">
+
+//                       <div className="flex items-center gap-3">
+
+//                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary-light)] text-[12px] font-semibold text-[var(--color-primary-text)]">
+//                           {member.username
+//                             ?.charAt(0)
+//                             ?.toUpperCase() || "U"}
+//                         </div>
+
+//                         <div>
+
+//                           <p className="text-[13px] font-medium text-[#252629]">
+//                             {member.username}
+//                           </p>
+
+//                           <p className="mt-0.5 text-[11px] text-[#8a8c91]">
+//                             {member.user_id}
+//                           </p>
+
+//                         </div>
+
+//                       </div>
+
+//                     </td>
+
+//                     {/* =================================================
+//                         ROLE DROPDOWN
+//                        ================================================= */}
+
+//                     <td className="px-5 py-4">
+
+//                       {member.role === "owner" ? (
+
+//                         /*
+//                          * Owner cannot be changed.
+//                          */
+//                         <RoleBadge role={member.role} />
+
+//                       ) : (
+
+//                         <select
+//                           value={member.role}
+//                           disabled={
+//                             updatingMemberId ===
+//                             member.memberId
+//                           }
+//                           onChange={(event) =>
+//                             handleRoleChange(
+//                               member,
+//                               event.target.value
+//                             )
+//                           }
+//                           className="
+//                             rounded-[8px]
+//                             border
+//                             border-[#dededc]
+//                             bg-white
+//                              cursor-pointer
+//                             px-3
+//                             py-1.5
+//                             text-[12px]
+//                             font-medium
+//                             text-[#252629]
+//                             outline-none
+//                             focus:border-[var(--color-primary)]
+//                             focus:ring-2
+//                             focus:ring-[var(--color-primary-light)]
+//                             disabled:cursor-not-allowed
+//                             disabled:opacity-60
+//                           "
+//                         >
+
+//                           <option value="admin" className="cursor-pointer">
+//                             Admin
+//                           </option>
+
+//                           <option value="editor" className="cursor-pointer">
+//                             Editor
+//                           </option>
+
+//                           <option value="viewer" className="cursor-pointer">
+//                             Viewer
+//                           </option>
+
+//                         </select>
+
+//                       )}
+
+//                     </td>
+
+//                     {/* =================================================
+//                         JOINED
+//                        ================================================= */}
+
+//                     <td className="px-5 py-4 text-[12px] text-[#7a7d84]">
+//                       {member.createAt
+//                         ? new Date(
+//                             member.createAt
+//                           ).toLocaleDateString()
+//                         : "—"}
+//                     </td>
+
+//                     {/* =================================================
+//                         DELETE
+//                        ================================================= */}
+
+//                     <td className="px-5 py-4">
+
+//                       {member.role === "owner" ? (
+
+//                         <div className="text-right text-[12px] text-[#9a9ca1]">
+//                           Owner
+//                         </div>
+
+//                       ) : (
+
+//                         <div className="flex justify-end gap-2">
+
+//                           <button
+//                             type="button"
+//                             onClick={() =>
+//                               setDeleteMember(member)
+//                             }
+//                             className="
+//                               rounded-[8px]
+//                               border
+//                               border-[var(--color-danger-border)]
+//                               bg-white
+//                               px-3
+//                               py-1.5
+//                               text-[12px]
+//                               font-medium
+//                               text-[var(--color-danger)]
+//                               transition
+//                               hover:bg-[var(--color-danger-bg)]
+//                             "
+//                           >
+//                             Delete
+//                           </button>
+
+//                         </div>
+
+//                       )}
+
+//                     </td>
+
+//                   </tr>
+//                 ))}
+
+//               </tbody>
+//             </table>
+//           </div>
+//         )}
+
+//       </div>
+
+//       {/* =========================================================
+//           DELETE CONFIRMATION MODAL
+          
+//           KEEP THIS.
+//           You only wanted to remove the role-change modal.
+//          ========================================================= */}
+
+//       {deleteMember && (
+//         <DeleteMemberModal
+//           member={deleteMember}
+//           workspaceId={workspaceId}
+//           onClose={() => setDeleteMember(null)}
+//           onSuccess={handleDeleteSuccess}
+//         />
+//       )}
+//     </>
+//   );
+// }
 
 
 

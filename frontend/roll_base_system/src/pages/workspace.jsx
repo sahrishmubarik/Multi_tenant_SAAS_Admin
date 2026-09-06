@@ -1,15 +1,20 @@
 import { useState } from "react";
 import AuthHeader from "../assets/components/AuthHeader";
 import { useNavigate } from "react-router-dom";
-import {nameSchema} from "../validations/validation.js";
+import { nameSchema } from "../validations/validation.js";
+import { useWorkspace } from "../assets/context/WorkspaceContext";
 export default function CreateWorkspace() {
+  const { addWorkspace } = useWorkspace();
   const [formData, setFormData] = useState({
     workspaceName: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
-   const navigate=useNavigate();
+  const [errors, setErrors] = useState("");
+  const [toast, setToast] = useState("");
+  const navigate = useNavigate();
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -17,24 +22,23 @@ export default function CreateWorkspace() {
       ...prevData,
       [name]: value,
     }));
-     
 
-        if (name === "name") {
-          const result = nameSchema.safeParse(value);
-    
-          if (!result.success) {
-            setMessage((previous) => ({
-              ...previous,
-              name: result.error.issues[0].message,
-            }));
-          } else {
-            setMessage((previous) => ({
-              ...previous,
-              name: "",
-            }));
-          }
-          setMessageType("error");
-        }
+    if (name === "name") {
+      const result = nameSchema.safeParse(value);
+
+      if (!result.success) {
+        setErrors((previous) => ({
+          ...previous,
+          name: result.error.issues[0].message,
+        }));
+      } else {
+        setErrors((previous) => ({
+          ...previous,
+          name: "",
+        }));
+      }
+      setMessageType("error");
+    }
     // Remove previous message when user starts typing again
     setMessage("");
     setMessageType("");
@@ -42,11 +46,12 @@ export default function CreateWorkspace() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if(!formData.workspaceName){
+    if (!formData.workspaceName) {
       setMessage("Workspace name is required");
       return;
     }
     setMessage("");
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
 
@@ -75,28 +80,64 @@ export default function CreateWorkspace() {
         setMessageType("error");
         return;
       }
-
+      console.log("CREATE WORKSPACE RESPONSE:", data);
+      console.log("NEW WORKSPACE:", data.workspace);
       setMessage("Workspace created successfully!");
       setMessageType("success");
-
+      setToast("Workspace created successfully");
       setFormData({
         workspaceName: "",
       });
-       navigate("/dashboard", { replace: true });
+
+      setTimeout(() => {
+        const newWorkspace = {
+          workspaceId: data.workspaceId,
+          workspaceName: formData.workspaceName,
+          role: data.role,
+        };
+        addWorkspace(newWorkspace);
+        navigate("/dashboard", { replace: true });
+      }, 1000);
     } catch (error) {
       console.error("Create workspace error:", error);
 
       setMessage("Something went wrong. Please try again.");
       setMessageType("error");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#E5EEE4]">
+    <div className="flex min-h-screen flex-col bg-[#E5EEE4]">
       <AuthHeader />
+      <main className="flex flex-1 items-center justify-center px-6">
+        {toast && (
+          <div
+            className="
+            fixed
+            right-6
+            top-6
+            z-50
+            rounded-lg
+            border
+            border-[var(--color-success-border)]
+            bg-[var(--color-success-bg)]
+            px-5
+            py-3
+            text-sm
+            font-medium
+            text-[var(--color-success)]
+            shadow-lg
+          "
+          >
+            {toast}
+          </div>
+        )}
 
-      <main className="flex justify-center ">
-        <div className="flex min-h-screen items-center justify-center bg-[#E5EEE4] px-6 py-10 sm:px-8">
+        <div className="w-full max-w-[950px]">
+          {/* <main className="flex min-h-[calc(100vh-50px)] items-center justify-center ">
+        <div className="flex items-center justify-center bg-[#E5EEE4] px-6 py-10 sm:px-8"> */}
           <div className="mx-auto grid w-full max-w-[950px] items-center gap-8 lg:grid-cols-[1fr_auto_1fr]">
             {/* LEFT - Create Workspace */}
             <div className="container-shadow w-full rounded-[20px] border border-[#dededc] bg-white p-6 sm:p-8">
@@ -149,12 +190,39 @@ export default function CreateWorkspace() {
                   focus:ring-2
                   focus:ring-[#eeeeec]
                 "
-                
                   />
+                  {/* Message */}
+                  {messageType === "error" && message && (
+                    <div className="mt-1 rounded-[9px] border border-red-200 bg-red-50 px-3 py-2.5 text-[13px] text-[var(--color-danger)]">
+                      {message}
+                    </div>
+                  )}
+                  {/* {message && (
+                  <div
+                    className={`rounded-[9px] border mt-1 px-3 py-2.5 text-[13px] ${
+                      messageType === "error"
+                        ? "border-red-200 bg-red-50 text-[var(--color-danger)]"
+                        : "border-green-200 bg-green-50 text-green-700"
+                    }`}
+                  >
+                    {message}
+                  </div>
+                )} */}
+                  {/* {errors.workspaceName && (
+              <p
+                className="
+                  mt-1
+                  text-sm
+                  text-[var(--color-danger)]
+                "
+              >
+                {errors.workspaceName}
+              </p>
+            )} */}
                 </div>
 
                 {/* Submit Button */}
-                <button
+                {/* <button
                   type="submit"
                   className="
                   cursor-pointer
@@ -174,9 +242,44 @@ export default function CreateWorkspace() {
               "
                 >
                   Create Workspace
+                </button> */}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="
+    btn-primary
+    w-full
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+  "
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span
+                        className="
+          h-4
+          w-4
+          animate-spin
+          rounded-full
+          border-2
+          border-white
+          border-t-transparent
+        "
+                      />
+                      Create Workspace...
+                    </span>
+                  ) : (
+                    "Create Workspace"
+                  )}
                 </button>
 
-                {/* Message */}
+                {messageType === "success" && message && (
+                  <div className="mt-1 rounded-[9px] border border-green-200 bg-green-50 px-3 py-2.5 text-[13px] text-green-700">
+                    {message}
+                  </div>
+                )}
+                {/* Message
                 {message && (
                   <div
                     className={`rounded-[9px] border px-3 py-2.5 text-[13px] ${
@@ -187,7 +290,7 @@ export default function CreateWorkspace() {
                   >
                     {message}
                   </div>
-                )}
+                )} */}
               </form>
             </div>
 

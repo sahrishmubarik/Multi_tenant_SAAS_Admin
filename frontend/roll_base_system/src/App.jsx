@@ -15,6 +15,7 @@ import MyWorkspace from "./pages/MyWorkspace.jsx";
 import Members from "./pages/Members.jsx";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import Activity from "./pages/Activity.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -22,6 +23,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login/>}/>
+        <Route path="/forgot-password" element={<ForgotPassword />} />
          <Route path="/verify-email" element={<VerifyEmail />} />
          <Route path="/reset-password" element={<ResetPassword />} />
         {/* Dashboard */}
@@ -39,7 +41,11 @@ function App() {
 
           <Route path="create-workspace" element={<CreateWorkspace />}/>
         </Route>
-        <Route path="/accept-invitation/accept" element={<AcceptInvitation />}/>
+         <Route
+  path="/accept-invitation"
+  element={<AcceptInvitation />}
+/> 
+         <Route path="/accept-invitation/accept" element={<AcceptInvitation />}/> 
          {/* <Route path="/profile" element={<Profile/>}/>
          <Route path="/create-workspace" element={<CreateWorkspace/>}/>
          <Route path="/my-workspace" element={<MyWorkspace/>}/> */}

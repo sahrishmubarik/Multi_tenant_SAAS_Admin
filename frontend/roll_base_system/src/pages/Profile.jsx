@@ -21,15 +21,12 @@ export default function Profile() {
       try {
         const token = localStorage.getItem("token");
 
-        const response = await fetch(
-          "http://localhost:3000/api/v1/auth/profile",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        const response = await fetch("/api/v1/auth/profile", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        );
+        });
 
         const data = await response.json();
 
@@ -91,7 +88,7 @@ export default function Profile() {
                 <input
                   type="text"
                   value={profile.name}
-                   disabled
+                  disabled
                   className="
           h-10
           w-full
@@ -171,6 +168,7 @@ export default function Profile() {
           w-full
           rounded-[8px]
           border border-[#dededc]
+          cursor-pointer
           bg-white
           px-4 py-2
           text-[13px]
@@ -179,6 +177,7 @@ export default function Profile() {
           transition
           hover:bg-[#f7f7f5]
           sm:w-auto
+         hover:text-[var(--color-danger)]
         "
                 >
                   Sign out

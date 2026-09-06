@@ -20,7 +20,7 @@ export default function VerifyEmail() {
 
     console.log("Token on frontend:", token);
 
-    if(!token) {
+    if (!token) {
       setMessage("Verification token is required.");
       return;
     }
@@ -57,9 +57,7 @@ export default function VerifyEmail() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)] px-4">
-      <div
-        className=" container-shadow w-full max-w-md  rounded-xl  border border-[var(--color-border)]  bg-white  p-8  text-center "
-      >
+      <div className=" container-shadow w-full max-w-md  rounded-xl  border border-[var(--color-border)]  bg-white  p-8  text-center ">
         <h1 className="mb-4 text-2xl font-bold text-[var(--color-text-primary)]">
           Email Verification
         </h1>

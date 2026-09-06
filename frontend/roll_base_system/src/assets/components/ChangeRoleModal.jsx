@@ -32,15 +32,13 @@ export default function ChangeRoleModal({
             workspaceId,
             role: newRole,
           }),
-        }
+        },
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to update role"
-        );
+        throw new Error(data.message || "Failed to update role");
       }
 
       onSuccess();

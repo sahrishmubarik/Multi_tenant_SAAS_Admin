@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, replace, useNavigate } from "react-router-dom";
 import { useWorkspace } from "../context/WorkspaceContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,10 +12,10 @@ import {
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 
-
 export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
-  const {workspaces,setWorkspaces,selectedWorkspace,selectWorkspace} = useWorkspace();
+  const { workspaces, setWorkspaces, selectedWorkspace, selectWorkspace } =
+    useWorkspace();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [workspaceLoading, setWorkspaceLoading] = useState(true);
 
@@ -26,78 +26,68 @@ export default function Sidebar({ isOpen, onClose }) {
     navigate("/login", { replace: true });
   };
 
- /* get user workspace */
+  /* get user workspace */
 
-useEffect(() => {
-  async function getWorkspaces() {
-    const token = localStorage.getItem("token");
+  useEffect(() => {
+    async function getWorkspaces() {
+      const token = localStorage.getItem("token");
 
-    try {
-      const response = await fetch(
-        "/api/v1/workspace/my-workspaces",
-        {
+      try {
+        const response = await fetch("/api/v1/workspace/my-workspaces", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error(data.message || "Failed to fetch workspaces");
+          return;
         }
-      );
 
-      const data = await response.json();
+        const workspaceList = data.workspaces || [];
 
-      if (!response.ok) {
-        console.error(
-          data.message || "Failed to fetch workspaces"
+        setWorkspaces(workspaceList);
+
+        if (workspaceList.length === 0) {
+          localStorage.removeItem("workspaceId");
+          selectWorkspace(null);
+          return;
+        }
+
+        const savedWorkspaceId = localStorage.getItem("workspaceId");
+
+        const savedWorkspace = workspaceList.find(
+          (workspace) => workspace.workspaceId === savedWorkspaceId,
         );
-        return;
+
+        if (savedWorkspace) {
+          selectWorkspace(savedWorkspace);
+        } else {
+          const firstWorkspace = workspaceList[0];
+
+          selectWorkspace(firstWorkspace);
+        }
+      } catch (error) {
+        console.error("Get workspaces error:", error);
+      } finally {
+        setWorkspaceLoading(false);
       }
-
-      const workspaceList = data.workspaces || [];
-
-      setWorkspaces(workspaceList);
-
-      if (workspaceList.length === 0) {
-        localStorage.removeItem("workspaceId");
-        selectWorkspace(null);
-        return;
-      }
-
-      const savedWorkspaceId =
-        localStorage.getItem("workspaceId");
-
-      const savedWorkspace = workspaceList.find(
-        (workspace) =>
-          workspace.workspaceId === savedWorkspaceId
-      );
-
-      if (savedWorkspace) {
-        selectWorkspace(savedWorkspace);
-      } else {
-        const firstWorkspace = workspaceList[0];
-
-        selectWorkspace(firstWorkspace);
-      }
-
-    } catch (error) {
-      console.error(
-        "Get workspaces error:",
-        error
-      );
-    } finally {
-      setWorkspaceLoading(false);
     }
-  }
 
-  getWorkspaces();
-}, []);
+    getWorkspaces();
+  }, []);
 
   /* select workspace*/
 
-function handleWorkspaceSelect(workspace) {
-  selectWorkspace(workspace);
+  function handleWorkspaceSelect(workspace) {
+    selectWorkspace(workspace);
 
-  setWorkspaceOpen(false);
-}
+    setWorkspaceOpen(false);
+    navigate("/dashboard", replace(true));
+  }
   const navLinkClass = ({ isActive }) =>
     `flex items-center gap-3 rounded-[9px] px-3 py-2.5 text-[13px] font-medium transition ${
       isActive
@@ -106,20 +96,18 @@ function handleWorkspaceSelect(workspace) {
     }`;
 
   return (
-    <aside className={`fixed left-0 top-0 z-50 flex h-screen w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-white
+    <aside
+      className={`fixed left-0 top-0 z-50 flex h-screen w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-white
     transition-transform
     duration-300
     ease-in-out
+    
 
-    ${
-      isOpen
-        ? "translate-x-0"
-        : "-translate-x-full"
-    }
+    ${isOpen ? "translate-x-0" : "-translate-x-full"}
 
     md:translate-x-0
-  `}>
-
+  `}
+    >
       {/* Logo */}
 
       <div className="px-5 py-5">
@@ -147,12 +135,9 @@ function handleWorkspaceSelect(workspace) {
       {/* WORKSPACE SELECTor */}
 
       <div className="relative px-4">
-
         <button
           type="button"
-          onClick={() =>
-            setWorkspaceOpen((previous) => !previous)
-          }
+          onClick={() => setWorkspaceOpen((previous) => !previous)}
           className="
             flex w-full
             items-center justify-between
@@ -166,9 +151,7 @@ function handleWorkspaceSelect(workspace) {
             hover:bg-[var(--color-surface-alt)]
           "
         >
-
           <div className="flex min-w-0 items-center gap-2">
-
             <div
               className="
                 flex h-7 w-7 shrink-0
@@ -186,17 +169,14 @@ function handleWorkspaceSelect(workspace) {
             <span className="max-w-[150px] truncate text-[13px] font-medium text-[var(--color-text-primary)]">
               {workspaceLoading
                 ? "Loading..."
-                : selectedWorkspace?.workspaceName ||
-                  "Select workspace"}
+                : selectedWorkspace?.workspaceName || "Select workspace"}
             </span>
-
           </div>
 
           <FontAwesomeIcon
             icon={faChevronDown}
             className="ml-2 text-[11px] text-[var(--color-text-muted)]"
           />
-
         </button>
 
         {/* WORKSPACE DROPDOWN */}
@@ -220,21 +200,17 @@ function handleWorkspaceSelect(workspace) {
                
             "
           >
-
             {workspaces.length === 0 ? (
               <div className="px-3 py-3 text-[12px] text-[var(--color-text-muted)] cursor_pointer">
                 No workspaces found.
               </div>
             ) : (
               <div className="max-h-60 overflow-y-auto">
-
                 {workspaces.map((workspace) => (
                   <button
                     key={workspace.workspaceId}
                     type="button"
-                    onClick={() =>
-                      handleWorkspaceSelect(workspace)
-                    }
+                    onClick={() => handleWorkspaceSelect(workspace)}
                     className={`
                      cursor-pointer
                       flex
@@ -247,14 +223,12 @@ function handleWorkspaceSelect(workspace) {
                       transition
                       hover:bg-[var(--color-surface-alt)]
                       ${
-                        selectedWorkspace?.workspaceId ===
-                        workspace.workspaceId
+                        selectedWorkspace?.workspaceId === workspace.workspaceId
                           ? "bg-[var(--color-primary-light)]"
                           : ""
                       }
                     `}
                   >
-
                     <div
                       className="
                         flex
@@ -275,7 +249,6 @@ function handleWorkspaceSelect(workspace) {
                     </div>
 
                     <div className="min-w-0 ">
-
                       <p className="truncate text-[13px] font-medium text-[var(--color-text-primary)]">
                         {workspace.workspaceName}
                       </p>
@@ -283,15 +256,11 @@ function handleWorkspaceSelect(workspace) {
                       <p className="text-[11px] text-[var(--color-text-muted)]">
                         {workspace.role}
                       </p>
-
                     </div>
-
                   </button>
                 ))}
-
               </div>
             )}
-
           </div>
         )}
 
@@ -299,9 +268,7 @@ function handleWorkspaceSelect(workspace) {
 
         <button
           type="button"
-          onClick={() =>
-            navigate("/dashboard/create-workspace")
-          }
+          onClick={() => navigate("/dashboard/create-workspace")}
           className="
             mt-2
            cursor-pointer
@@ -322,16 +289,13 @@ function handleWorkspaceSelect(workspace) {
             icon={faPlus}
             className="w-4 text-[12px] cursor_pointer"
           />
-
           Create workspace
         </button>
-
       </div>
 
       {/* Navigation */}
 
       <div className="mt-7 px-4">
-
         <p
           className="
             mb-2 px-3
@@ -346,48 +310,24 @@ function handleWorkspaceSelect(workspace) {
         </p>
 
         <nav className="space-y-1">
-
-                       <NavLink
-  to="/dashboard"
-  className={navLinkClass}
->
-  Dashboard
-</NavLink>
-          <NavLink
-            to="/dashboard/workspace"
-            className={navLinkClass}
-          >
-            <FontAwesomeIcon
-              icon={faBuilding}
-              className="w-4 text-[12px]"
-            />
+          <NavLink to="/dashboard" className={navLinkClass}>
+            Dashboard
+          </NavLink>
+          <NavLink to="/dashboard/workspace" className={navLinkClass}>
+            <FontAwesomeIcon icon={faBuilding} className="w-4 text-[12px]" />
             Workspace
           </NavLink>
 
-          <NavLink
-            to="/dashboard/members"
-            className={navLinkClass}
-          >
-            <FontAwesomeIcon
-              icon={faUsers}
-              className="w-4 text-[12px]"
-            />
+          <NavLink to="/dashboard/members" className={navLinkClass}>
+            <FontAwesomeIcon icon={faUsers} className="w-4 text-[12px]" />
             Members
           </NavLink>
-          <NavLink
-            to="/dashboard/profile"
-            className={navLinkClass}
-          >
-            <FontAwesomeIcon
-              icon={faUser}
-              className="w-4 text-[12px]"
-            />
+          <NavLink to="/dashboard/profile" className={navLinkClass}>
+            <FontAwesomeIcon icon={faUser} className="w-4 text-[12px]" />
             Profile
           </NavLink>
-
-
         </nav>
- 
+
         {/* Activity */}
 
         <p
@@ -403,24 +343,18 @@ function handleWorkspaceSelect(workspace) {
           Activity
         </p>
 
-        <NavLink
-          to="/dashboard/activity"
-          className={navLinkClass}
-        >
+        <NavLink to="/dashboard/activity" className={navLinkClass}>
           <FontAwesomeIcon
             icon={faClockRotateLeft}
             className="w-4 text-[12px]"
           />
-
           Activity
         </NavLink>
-
       </div>
 
       {/* Bottom */}
 
       <div className="mt-auto border-t border-[var(--color-border)] p-4">
-
         <button
           type="button"
           onClick={handleLogout}
@@ -438,18 +372,13 @@ function handleWorkspaceSelect(workspace) {
             hover:text-[var(--color-danger)]
           "
         >
-
           <FontAwesomeIcon
             icon={faRightFromBracket}
             className="w-4 text-[12px]"
           />
-
           Sign out
-
         </button>
-
       </div>
-
     </aside>
   );
 }

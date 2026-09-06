@@ -4,7 +4,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import AuthHeader from "../assets/components/AuthHeader";
-import { resetPasswordSchema } from "../validations/validation"
+import { passwordSchema, resetPasswordSchema } from "../validations/validation";
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -18,17 +18,82 @@ export default function ResetPassword() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [errors, setErrors] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   function handleChange(event) {
     const { name, value } = event.target;
 
-    setFormData((previous) => ({
-      ...previous,
+    const updatedFormData = {
+      ...formData,
       [name]: value,
-    }));
+    };
+    setFormData(updatedFormData);
+
+    /* =========================
+           PASSWORD VALIDATION
+        ========================= */
+
+    if (name === "password") {
+      const result = passwordSchema.safeParse(value);
+
+      if (!result.success) {
+        setErrors((previous) => ({
+          ...previous,
+          password: result.error.issues[0].message,
+        }));
+      } else {
+        setErrors((previous) => ({
+          ...previous,
+          password: "",
+        }));
+      }
+
+      /*
+            Password changed, so confirm password
+            needs to be checked again.
+          */
+
+      if (updatedFormData.confirmPassword) {
+        const confirmResult = resetPasswordSchema.safeParse(updatedFormData);
+
+        const confirmError = confirmResult.error?.issues.find(
+          (issue) => issue.path[0] === "confirmPassword",
+        );
+
+        setErrors((previous) => ({
+          ...previous,
+          confirmPassword: confirmError ? confirmError.message : "",
+        }));
+      }
+    }
+
+    /* =========================
+           CONFIRM PASSWORD VALIDATION
+        ========================= */
+
+    if (name === "confirmPassword") {
+      const result = resetPasswordSchema.safeParse(updatedFormData);
+
+      if (!result.success) {
+        const confirmError = result.error.issues.find(
+          (issue) => issue.path[0] === "confirmPassword",
+        );
+
+        if (confirmError) {
+          setErrors((previous) => ({
+            ...previous,
+            confirmPassword: confirmError.message,
+          }));
+        }
+      } else {
+        setErrors((previous) => ({
+          ...previous,
+          confirmPassword: "",
+        }));
+      }
+    }
   }
 
   async function handleSubmit(event) {
@@ -37,17 +102,27 @@ export default function ResetPassword() {
     setMessage("");
 
     /* ZOD VALIDATION */
-    
-        const result = resetPasswordSchema.safeParse(formData);
-    
-        if (!result.success) {
-          const errorMessages = result.error.issues.map(
-            (issue) => issue.message
-          );
-    
-          setMessage(errorMessages.join(" "));
-          return;
+
+    const result = resetPasswordSchema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors = {};
+
+      result.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0];
+
+        if (fieldName && !fieldErrors[fieldName]) {
+          fieldErrors[fieldName] = issue.message;
         }
+      });
+
+      setErrors(fieldErrors);
+
+      return;
+    }
+
+    setErrors({});
+    setLoading(true);
     if (!token) {
       setMessage("Password reset token is required.");
       return;
@@ -67,7 +142,7 @@ export default function ResetPassword() {
       setLoading(true);
 
       const response = await fetch(
-         `/api/v1/auth/reset-password?token=${encodeURIComponent(token)}`,
+        `/api/v1/auth/reset-password?token=${encodeURIComponent(token)}`,
         {
           method: "POST",
           headers: {
@@ -87,8 +162,8 @@ export default function ResetPassword() {
       // console.log("Status:", response.status);
       const text = await response.text();
 
-console.log("Status:", response.status);
-console.log("Response body:", text);
+      console.log("Status:", response.status);
+      console.log("Response body:", text);
 
       if (!response.ok) {
         console.log("Reset password response:", text);
@@ -112,16 +187,14 @@ console.log("Response body:", text);
   }
 
   return (
-       
-     <>
-         <div className="min-h-screen bg-[#E5EEE4]">
-      <AuthHeader />
-    
-      <main className="flex justify-center pt-8">
-      
-    <div className="flex items-center justify-center bg-[#E5EEE4] px-4 py-8">
-      <div
-        className="
+    <>
+      <div className="min-h-screen bg-[#E5EEE4]">
+        <AuthHeader />
+
+        <main className="flex justify-center pt-8">
+          <div className="flex items-center justify-center bg-[#E5EEE4] px-4 py-8">
+            <div
+              className="
           container-shadow
           w-full max-w-md
           rounded-xl
@@ -130,38 +203,37 @@ console.log("Response body:", text);
           p-6
           sm:p-8
         "
-      >
-        {/* Heading */}
-        <div className="mb-7 text-center">
-          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
-            Reset Password
-          </h1>
-
-          <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
-            Create a new password for your account.
-          </p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          /* New Password */
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-2 block text-sm font-medium text-[var(--color-text-primary)]"
             >
-              New Password
-            </label>
+              {/* Heading */}
+              <div className="mb-7 text-center">
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
+                  Reset Password
+                </h1>
 
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter new password"
-                className="
+                <p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">
+                  Create a new password for your account.
+                </p>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="mb-2 block text-sm font-medium text-[var(--color-text-primary)]"
+                  >
+                    New Password
+                  </label>
+
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter new password"
+                      className="
                   h-10 w-full
                   rounded-lg
                   border border-[var(--color-border)]
@@ -176,12 +248,12 @@ console.log("Response body:", text);
                   focus:ring-2
                   focus:ring-[var(--color-primary-light)]
                 "
-              />
+                    />
 
-              <button
-                type="button"
-                onClick={() => setShowPassword((previous) => !previous)}
-                className="
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((previous) => !previous)}
+                      className="
                   absolute right-3 top-1/2
                   -translate-y-1/2
                   text-xs font-semibold
@@ -189,30 +261,43 @@ console.log("Response body:", text);
                 transition-colors
                 hover:text-[var(--color-primary)]
                 "
-              >
-                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-              </button>
-            </div>
-          </div>
+                    >
+                      <FontAwesomeIcon
+                        icon={showPassword ? faEyeSlash : faEye}
+                      />
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p
+                      className="
+                  mt-1
+                  text-sm
+                  text-[var(--color-danger)]
+                "
+                    >
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="mb-2 block text-sm font-medium text-[var(--color-text-primary)]"
-            >
-              Confirm Password
-            </label>
+                {/* Confirm Password */}
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="mb-2 block text-sm font-medium text-[var(--color-text-primary)]"
+                  >
+                    Confirm Password
+                  </label>
 
-            <div className="relative">
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm new password"
-                className="
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm new password"
+                      className="
                   h-10 w-full
                   rounded-lg
                   border border-[var(--color-border)]
@@ -227,12 +312,14 @@ console.log("Response body:", text);
                   focus:ring-2
                   focus:ring-[var(--color-primary-light)]
                 "
-              />
+                    />
 
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((previous) => !previous)}
-                className="
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword((previous) => !previous)
+                      }
+                      className="
                   absolute right-3 top-1/2
                   -translate-y-1/2
                   text-xs font-semibold
@@ -240,57 +327,98 @@ console.log("Response body:", text);
                 transition-colors
                 hover:text-[var(--color-primary)]
                 "
-              >
-                <FontAwesomeIcon
-                  icon={showConfirmPassword ? faEyeSlash : faEye}
-                />
-              </button>
-            </div>
-          </div>
+                    >
+                      <FontAwesomeIcon
+                        icon={showConfirmPassword ? faEyeSlash : faEye}
+                      />
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p
+                      className="
+                  mt-1
+                  text-sm
+                  text-[var(--color-danger)]
+                "
+                    >
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
 
-          {/* Message */}
-          {message && (
-            <p
-              className="
+                {/* Message */}
+                {message && (
+                  <p
+                    className="
                 rounded-lg
                 bg-[var(--color-danger-bg)]
                 px-3 py-2
                 text-center text-sm
                 text-[var(--color-danger)]
               "
-            >
-              {message}
-            </p>
-          )}
+                  >
+                    {message}
+                  </p>
+                )}
 
-          {/* Submit */}
-          <button
+                {/* Submit */}
+                {/* <button
             type="submit"
             disabled={loading}
             className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Resetting..." : "Reset Password"}
-          </button>
-        </form>
+          </button> */}
 
-        {/* Login */}
-        <div className="mt-6 text-center">
-          <a
-            href="/login"
-            className="
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="
+    btn-primary
+    w-full
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+  "
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span
+                        className="
+          h-4
+          w-4
+          animate-spin
+          rounded-full
+          border-2
+          border-white
+          border-t-transparent
+        "
+                      />
+                      Resetting...
+                    </span>
+                  ) : (
+                    "Reset Password"
+                  )}
+                </button>
+              </form>
+
+              {/* Login */}
+              <div className="mt-6 text-center">
+                <a
+                  href="/login"
+                  className="
               text-sm font-medium
               text-[var(--color-primary)]
               transition-colors
               hover:text-[var(--color-primary-hover)]
             "
-          >
-            Back to Login
-          </a>
-        </div>
+                >
+                  Back to Login
+                </a>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
-    </div>
-      </main>
-    </div>
     </>
   );
 }

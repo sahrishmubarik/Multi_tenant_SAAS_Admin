@@ -1,8 +1,4 @@
-
-import {
-  faEye,
-  faEyeSlash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,17 +18,13 @@ export default function SignupCard() {
     confirmPassword: "",
   };
 
-  const [formData, setFormData] = useState(
-    defaultFormValue
-  );
+  const [formData, setFormData] = useState(defaultFormValue);
 
   const [errors, setErrors] = useState({});
 
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [message, setMessage] = useState("");
 
@@ -109,8 +101,7 @@ export default function SignupCard() {
       if (!result.success) {
         setErrors((previous) => ({
           ...previous,
-          password:
-            result.error.issues[0].message,
+          password: result.error.issues[0].message,
         }));
       } else {
         setErrors((previous) => ({
@@ -125,20 +116,15 @@ export default function SignupCard() {
       */
 
       if (updatedFormData.confirmPassword) {
-        const confirmResult =
-          signupSchema.safeParse(updatedFormData);
+        const confirmResult = signupSchema.safeParse(updatedFormData);
 
-        const confirmError =
-          confirmResult.error?.issues.find(
-            (issue) =>
-              issue.path[0] === "confirmPassword"
-          );
+        const confirmError = confirmResult.error?.issues.find(
+          (issue) => issue.path[0] === "confirmPassword",
+        );
 
         setErrors((previous) => ({
           ...previous,
-          confirmPassword: confirmError
-            ? confirmError.message
-            : "",
+          confirmPassword: confirmError ? confirmError.message : "",
         }));
       }
     }
@@ -148,21 +134,17 @@ export default function SignupCard() {
     ========================= */
 
     if (name === "confirmPassword") {
-      const result =
-        signupSchema.safeParse(updatedFormData);
+      const result = signupSchema.safeParse(updatedFormData);
 
       if (!result.success) {
-        const confirmError =
-          result.error.issues.find(
-            (issue) =>
-              issue.path[0] === "confirmPassword"
-          );
+        const confirmError = result.error.issues.find(
+          (issue) => issue.path[0] === "confirmPassword",
+        );
 
         if (confirmError) {
           setErrors((previous) => ({
             ...previous,
-            confirmPassword:
-              confirmError.message,
+            confirmPassword: confirmError.message,
           }));
         }
       } else {
@@ -188,8 +170,7 @@ export default function SignupCard() {
        ZOD VALIDATION
     ========================= */
 
-    const result =
-      signupSchema.safeParse(formData);
+    const result = signupSchema.safeParse(formData);
 
     if (!result.success) {
       const fieldErrors = {};
@@ -197,12 +178,8 @@ export default function SignupCard() {
       result.error.issues.forEach((issue) => {
         const fieldName = issue.path[0];
 
-        if (
-          fieldName &&
-          !fieldErrors[fieldName]
-        ) {
-          fieldErrors[fieldName] =
-            issue.message;
+        if (fieldName && !fieldErrors[fieldName]) {
+          fieldErrors[fieldName] = issue.message;
         }
       });
 
@@ -219,30 +196,21 @@ export default function SignupCard() {
          CREATE ACCOUNT
       ========================= */
 
-      const response = await fetch(
-        "/api/v1/auth/signup",
-        {
-          method: "POST",
+      const response = await fetch("/api/v1/auth/signup", {
+        method: "POST",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-          body: JSON.stringify(result.data),
-        }
-      );
+        body: JSON.stringify(result.data),
+      });
 
       const data = await response.json();
 
-      console.log(
-        "Signup response status:",
-        response.status
-      );
+      console.log("Signup response status:", response.status);
 
-      console.log(
-        "Signup response body:",
-        data
-      );
+      console.log("Signup response body:", data);
 
       /* =========================
          SIGNUP BACKEND ERROR
@@ -250,18 +218,13 @@ export default function SignupCard() {
 
       if (!response.ok) {
         if (data.errors) {
-          const errorMessages =
-            Object.values(data.errors).flat();
+          const errorMessages = Object.values(data.errors).flat();
 
-          setMessage(
-            errorMessages.join(" ")
-          );
+          setMessage(errorMessages.join(" "));
         } else if (data.message) {
           setMessage(data.message);
         } else {
-          setMessage(
-            "Signup failed. Please try again."
-          );
+          setMessage("Signup failed. Please try again.");
         }
 
         return;
@@ -278,34 +241,26 @@ export default function SignupCard() {
         endpoint.
       */
 
-      const verificationResponse =
-        await fetch(
-          "/api/v1/auth/email-verification-token",
-          {
-            method: "POST",
+      const verificationResponse = await fetch(
+        "/api/v1/auth/email-verification-token",
+        {
+          method: "POST",
 
-            headers: {
-              "Content-Type": "application/json",
-            },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-            body: JSON.stringify({
-              email: result.data.email,
-            }),
-          }
-        );
-
-      const verificationData =
-        await verificationResponse.json();
-
-      console.log(
-        "Verification response status:",
-        verificationResponse.status
+          body: JSON.stringify({
+            email: result.data.email,
+          }),
+        },
       );
 
-      console.log(
-        "Verification response body:",
-        verificationData
-      );
+      const verificationData = await verificationResponse.json();
+
+      console.log("Verification response status:", verificationResponse.status);
+
+      console.log("Verification response body:", verificationData);
 
       /* =========================
          VERIFICATION EMAIL ERROR
@@ -314,7 +269,7 @@ export default function SignupCard() {
       if (!verificationResponse.ok) {
         setMessage(
           verificationData.message ||
-            "Account created, but verification email could not be sent."
+            "Account created, but verification email could not be sent.",
         );
 
         return;
@@ -328,9 +283,7 @@ export default function SignupCard() {
 
       setErrors({});
 
-      setToast(
-        "Account created! Verification email sent."
-      );
+      setToast("Account created! Verification email sent.");
 
       /*
         Show toast for 1 second,
@@ -343,14 +296,9 @@ export default function SignupCard() {
         });
       }, 1000);
     } catch (error) {
-      console.error(
-        "Signup error:",
-        error
-      );
+      console.error("Signup error:", error);
 
-      setMessage(
-        "Something went wrong. Please try again."
-      );
+      setMessage("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -368,25 +316,25 @@ export default function SignupCard() {
         py-8
       "
     >
-
       {/* =========================
           SUCCESS TOAST
       ========================= */}
-
       {toast && (
         <div
           className="
             fixed
-            top-5
-            right-5
+            right-6
+            top-6
             z-50
             rounded-lg
-            bg-[var(--color-success)]
+            border
+            border-[var(--color-success-border)]
+            bg-[var(--color-success-bg)]
             px-5
             py-3
             text-sm
             font-medium
-            text-white
+            text-[var(--color-success)]
             shadow-lg
           "
         >
@@ -397,8 +345,7 @@ export default function SignupCard() {
       <div
         className="
           container-shadow
-          w-full
-          max-w-md
+          w-[400px]
           rounded-xl
           border
           border-[var(--color-border)]
@@ -407,13 +354,11 @@ export default function SignupCard() {
           sm:p-8
         "
       >
-
         {/* =========================
             HEADING
         ========================= */}
 
         <div className="mb-7 text-center">
-
           <p
             className="
               mb-1
@@ -443,27 +388,20 @@ export default function SignupCard() {
               text-[var(--color-text-secondary)]
             "
           >
-            Create your account and get started
-            with RoleBase.
+            Create your account and get started with RoleBase.
           </p>
-
         </div>
 
         {/* =========================
             FORM
         ========================= */}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-        >
-
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* =========================
               NAME
           ========================= */}
 
           <div>
-
             <label
               htmlFor="name"
               className="
@@ -514,7 +452,6 @@ export default function SignupCard() {
                 {errors.name}
               </p>
             )}
-
           </div>
 
           {/* =========================
@@ -522,7 +459,6 @@ export default function SignupCard() {
           ========================= */}
 
           <div>
-
             <label
               htmlFor="email"
               className="
@@ -573,7 +509,6 @@ export default function SignupCard() {
                 {errors.email}
               </p>
             )}
-
           </div>
 
           {/* =========================
@@ -581,7 +516,6 @@ export default function SignupCard() {
           ========================= */}
 
           <div>
-
             <label
               htmlFor="password"
               className="
@@ -596,14 +530,9 @@ export default function SignupCard() {
             </label>
 
             <div className="relative">
-
               <input
                 id="password"
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -630,13 +559,10 @@ export default function SignupCard() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword(
-                    (previous) => !previous
-                  )
-                }
+                onClick={() => setShowPassword((previous) => !previous)}
                 className="
                   absolute
+                  cursor-pointer
                   right-3
                   top-1/2
                   -translate-y-1/2
@@ -645,15 +571,8 @@ export default function SignupCard() {
                   hover:text-[var(--color-primary)]
                 "
               >
-                <FontAwesomeIcon
-                  icon={
-                    showPassword
-                      ? faEyeSlash
-                      : faEye
-                  }
-                />
+                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
               </button>
-
             </div>
 
             {errors.password && (
@@ -667,7 +586,6 @@ export default function SignupCard() {
                 {errors.password}
               </p>
             )}
-
           </div>
 
           {/* =========================
@@ -675,7 +593,6 @@ export default function SignupCard() {
           ========================= */}
 
           <div>
-
             <label
               htmlFor="confirmPassword"
               className="
@@ -690,18 +607,11 @@ export default function SignupCard() {
             </label>
 
             <div className="relative">
-
               <input
                 id="confirmPassword"
-                type={
-                  showConfirmPassword
-                    ? "text"
-                    : "password"
-                }
+                type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
-                value={
-                  formData.confirmPassword
-                }
+                value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Confirm your password"
                 className="
@@ -726,13 +636,10 @@ export default function SignupCard() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowConfirmPassword(
-                    (previous) => !previous
-                  )
-                }
+                onClick={() => setShowConfirmPassword((previous) => !previous)}
                 className="
                   absolute
+                  cursor-pointer
                   right-3
                   top-1/2
                   -translate-y-1/2
@@ -742,14 +649,9 @@ export default function SignupCard() {
                 "
               >
                 <FontAwesomeIcon
-                  icon={
-                    showConfirmPassword
-                      ? faEyeSlash
-                      : faEye
-                  }
+                  icon={showConfirmPassword ? faEyeSlash : faEye}
                 />
               </button>
-
             </div>
 
             {errors.confirmPassword && (
@@ -763,7 +665,6 @@ export default function SignupCard() {
                 {errors.confirmPassword}
               </p>
             )}
-
           </div>
 
           {/* =========================
@@ -771,6 +672,36 @@ export default function SignupCard() {
           ========================= */}
 
           <button
+            type="submit"
+            disabled={loading}
+            className="
+    btn-primary
+    w-full
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+  "
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span
+                  className="
+          h-4
+          w-4
+          animate-spin
+          rounded-full
+          border-2
+          border-white
+          border-t-transparent
+        "
+                />
+                Creating account...
+              </span>
+            ) : (
+              "Create Account"
+            )}
+          </button>
+
+          {/* <button
             type="submit"
             disabled={loading}
             className="
@@ -784,7 +715,7 @@ export default function SignupCard() {
             {loading
               ? "Creating account..."
               : "Create Account"}
-          </button>
+          </button> */}
 
           {/* =========================
               BACKEND ERROR
@@ -814,7 +745,6 @@ export default function SignupCard() {
             "
           >
             Already have an account?{" "}
-
             <a
               href="/login"
               className="
@@ -826,15 +756,12 @@ export default function SignupCard() {
             >
               Login
             </a>
-
           </p>
-
         </form>
       </div>
     </div>
   );
 }
-
 
 // import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -930,8 +857,6 @@ export default function SignupCard() {
 
 //         return;
 //       }
-
- 
 
 //       setMessage(
 //         "Account created successfully!"

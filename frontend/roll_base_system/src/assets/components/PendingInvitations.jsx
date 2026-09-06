@@ -1,21 +1,13 @@
-
 import { useEffect, useState } from "react";
 
-function ConfirmRevokeModal({
-  invitation,
-  loading,
-  onClose,
-  onConfirm,
-}) {
+function ConfirmRevokeModal({ invitation, loading, onClose, onConfirm }) {
   if (!invitation) {
     return null;
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-
       <div className="w-full max-w-md rounded-[16px] bg-white p-6 shadow-xl">
-
         {/* Heading */}
         <h2 className="text-[17px] font-semibold text-[#17181a]">
           Revoke invitation?
@@ -24,9 +16,7 @@ function ConfirmRevokeModal({
         {/* Description */}
         <p className="mt-2 text-[13px] leading-5 text-[#66686d]">
           Are you sure you want to revoke the invitation sent to{" "}
-          <span className="font-medium text-[#252629]">
-            {invitation.email}
-          </span>
+          <span className="font-medium text-[#252629]">{invitation.email}</span>
           ?
         </p>
 
@@ -36,7 +26,6 @@ function ConfirmRevokeModal({
 
         {/* Actions */}
         <div className="mt-6 flex justify-end gap-2">
-
           <button
             type="button"
             disabled={loading}
@@ -80,7 +69,6 @@ function ConfirmRevokeModal({
           >
             {loading ? "Revoking..." : "Revoke"}
           </button>
-
         </div>
       </div>
     </div>
@@ -89,6 +77,8 @@ function ConfirmRevokeModal({
 
 export default function PendingInvitations({
   workspaceId,
+  invitationRefresh,
+  onShowToast,
 }) {
   const [invitations, setInvitations] = useState([]);
 
@@ -103,8 +93,7 @@ export default function PendingInvitations({
   /*
    * Invitation that is waiting for confirmation.
    */
-  const [selectedInvitation, setSelectedInvitation] =
-    useState(null);
+  const [selectedInvitation, setSelectedInvitation] = useState(null);
 
   /* =====================================================
      FETCH INVITATIONS
@@ -136,31 +125,20 @@ export default function PendingInvitations({
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
-        }
+        },
       );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Failed to fetch invitations"
-        );
+        throw new Error(data.message || "Failed to fetch invitations");
       }
 
-      console.log(
-        "Invitation API response:",
-        data
-      );
+      console.log("Invitation API response:", data);
 
-      setInvitations(
-        data.invitations || []
-      );
+      setInvitations(data.invitations || []);
     } catch (error) {
-      console.error(
-        "Invitation status error:",
-        error
-      );
+      console.error("Invitation status error:", error);
 
       setError(error.message);
     } finally {
@@ -172,65 +150,50 @@ export default function PendingInvitations({
      REVOKE INVITATION
      ===================================================== */
 
-  async function cancelInvitation(
-    invitationId
-  ) {
-    const authToken =
-      localStorage.getItem("token");
+  async function cancelInvitation(invitationId) {
+    const authToken = localStorage.getItem("token");
 
     try {
       if (!authToken) {
-        setError(
-          "Authorization token is required."
-        );
+        setError("Authorization token is required.");
         return;
       }
 
       setRevokingId(invitationId);
       setError("");
 
-      const response = await fetch(
-        "/api/v1/workspace-invitation/revoke",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            invitationId,
-          }),
-        }
-      );
+      const response = await fetch("/api/v1/workspace-invitation/revoke", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          invitationId,
+          workspaceId,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Failed to revoke invitation"
-        );
+        throw new Error(data.message || "Failed to revoke invitation");
       }
 
       /*
        * Remove from current list.
        */
       setInvitations((previous) =>
-        previous.filter(
-          (invitation) =>
-            invitation.id !== invitationId
-        )
+        previous.filter((invitation) => invitation.id !== invitationId),
       );
 
       /*
        * Close confirmation modal.
        */
+      onShowToast("Invitation successfully revoked! ");
       setSelectedInvitation(null);
     } catch (error) {
-      console.error(
-        "Revoke invitation error:",
-        error
-      );
+      console.error("Revoke invitation error:", { error });
 
       setError(error.message);
     } finally {
@@ -254,7 +217,7 @@ export default function PendingInvitations({
 
   useEffect(() => {
     fetchInvitations();
-  }, [workspaceId, status]);
+  }, [workspaceId, status, invitationRefresh]);
 
   /* =====================================================
      TITLE
@@ -307,15 +270,12 @@ export default function PendingInvitations({
   return (
     <>
       <div className="mt-6 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
-
         {/* =================================================
             HEADER
            ================================================= */}
 
         <div className="border-b border-[#e7e7e5] px-5 py-4">
-
           <div className="flex items-center justify-between gap-4">
-
             <div>
               <h2 className="text-[15px] font-semibold text-[#17181a]">
                 {getTitle()}
@@ -328,10 +288,7 @@ export default function PendingInvitations({
 
             {/* STATUS DROPDOWN */}
             <div>
-              <label
-                htmlFor="invitation-status"
-                className="sr-only"
-              >
+              <label htmlFor="invitation-status" className="sr-only">
                 Check invitation status
               </label>
 
@@ -340,6 +297,7 @@ export default function PendingInvitations({
                 value={status}
                 onChange={handleStatusChange}
                 className="
+                cursor-pointer
                   rounded-[8px]
                   border
                   border-[#dededc]
@@ -355,20 +313,13 @@ export default function PendingInvitations({
                   focus:ring-[var(--color-primary-light)]
                 "
               >
-                <option value="PENDING">
-                  Pending
-                </option>
+                <option value="PENDING">Pending</option>
 
-                <option value="ACCEPTED">
-                  Accepted
-                </option>
+                <option value="ACCEPTED">Accepted</option>
 
-                <option value="REVOKED">
-                  Revoked
-                </option>
+                <option value="REVOKED">Revoked</option>
               </select>
             </div>
-
           </div>
         </div>
 
@@ -377,12 +328,9 @@ export default function PendingInvitations({
            ================================================= */}
 
         <div className="px-5 py-5">
-
           {/* Loading */}
           {loading && (
-            <p className="text-[13px] text-[#77797e]">
-              Loading invitations...
-            </p>
+            <p className="text-[13px] text-[#77797e]">Loading invitations...</p>
           )}
 
           {/* Error */}
@@ -393,25 +341,17 @@ export default function PendingInvitations({
           )}
 
           {/* Empty */}
-          {!loading &&
-            !error &&
-            invitations.length === 0 && (
-              <p className="text-[13px] text-[#77797e]">
-                {getEmptyMessage()}
-              </p>
-            )}
+          {!loading && !error && invitations.length === 0 && (
+            <p className="text-[13px] text-[#77797e]">{getEmptyMessage()}</p>
+          )}
 
           {/* Invitations */}
-          {!loading &&
-            !error &&
-            invitations.length > 0 && (
-              <div className="space-y-3">
-
-                {invitations.map(
-                  (invitation) => (
-                    <div
-                      key={invitation.id}
-                      className="
+          {!loading && !error && invitations.length > 0 && (
+            <div className="space-y-3">
+              {invitations.map((invitation) => (
+                <div
+                  key={invitation.id}
+                  className="
                         flex
                         flex-col
                         gap-3
@@ -424,36 +364,26 @@ export default function PendingInvitations({
                         sm:items-center
                         sm:justify-between
                       "
-                    >
+                >
+                  {/* EMAIL + STATUS */}
+                  <div>
+                    <p className="text-[13px] font-medium text-[#252629]">
+                      {invitation.email}
+                    </p>
 
-                      {/* EMAIL + STATUS */}
-                      <div>
+                    <p className="mt-1 text-[12px] text-[#77797e]">
+                      {invitation.status}
+                    </p>
+                  </div>
 
-                        <p className="text-[13px] font-medium text-[#252629]">
-                          {invitation.email}
-                        </p>
-
-                        <p className="mt-1 text-[12px] text-[#77797e]">
-                          {invitation.status}
-                        </p>
-
-                      </div>
-
-                      {/* PENDING ACTION */}
-                      {status === "PENDING" && (
-                        <button
-                          type="button"
-                          title="Revoke invitation"
-                          disabled={
-                            revokingId ===
-                            invitation.id
-                          }
-                          onClick={() =>
-                            setSelectedInvitation(
-                              invitation
-                            )
-                          }
-                          className="
+                  {/* PENDING ACTION */}
+                  {status === "PENDING" && (
+                    <button
+                      type="button"
+                      title="Revoke invitation"
+                      disabled={revokingId === invitation.id}
+                      onClick={() => setSelectedInvitation(invitation)}
+                      className="
                             flex
                             h-8
                             w-8
@@ -468,38 +398,31 @@ export default function PendingInvitations({
                             disabled:cursor-not-allowed
                             disabled:opacity-50
                           "
+                    >
+                      {revokingId === invitation.id ? (
+                        <span className="text-[11px]">...</span>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          className="h-5 w-5"
                         >
-                          {revokingId ===
-                          invitation.id ? (
-                            <span className="text-[11px]">
-                              ...
-                            </span>
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              className="h-5 w-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M6 7h12M9 7V5h6v2m-8 0 1 12h6l1-12M10 11v5m4-5v5"
-                              />
-                            </svg>
-                          )}
-                        </button>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 7h12M9 7V5h6v2m-8 0 1 12h6l1-12M10 11v5m4-5v5"
+                          />
+                        </svg>
                       )}
-
-                    </div>
-                  )
-                )}
-
-              </div>
-            )}
-
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -510,28 +433,18 @@ export default function PendingInvitations({
       <ConfirmRevokeModal
         invitation={selectedInvitation}
         loading={
-          selectedInvitation
-            ? revokingId ===
-              selectedInvitation.id
-            : false
+          selectedInvitation ? revokingId === selectedInvitation.id : false
         }
-        onClose={() =>
-          setSelectedInvitation(null)
-        }
+        onClose={() => setSelectedInvitation(null)}
         onConfirm={() => {
           if (selectedInvitation) {
-            cancelInvitation(
-              selectedInvitation.id
-            );
+            cancelInvitation(selectedInvitation.id);
           }
         }}
       />
     </>
   );
 }
-
-
-
 
 // import { useEffect, useState } from "react";
 

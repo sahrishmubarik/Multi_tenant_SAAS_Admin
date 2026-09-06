@@ -3,6 +3,9 @@ import { z } from "zod";
 /* =========================
    REUSABLE FIELD VALIDATIONS
 ========================= */
+// 1. Shared constants and base validators
+export const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 
 export const nameSchema = z
   .string()
@@ -16,17 +19,42 @@ export const emailSchema = z
   .email("Please enter a valid email address.")
   .max(50, "Email must not exceed 50 characters.");
 
+
+
 export const passwordSchema = z
-  .string()
-  .min(12, "Password must be at least 12 characters.")
-  .regex(
-    /[!@#$%^&*(),.?":{}|<>]/,
-    "Password must contain at least one special character."
+  .string().min(12, "Password must be at least 12 characters")
+  .max(50).regex(
+    passwordRegex,
+    "At least one uppercase letter,one lowercase,one number,one special character (@$!%*?&) required"
   );
 
-/* =========================
-   PASSWORD + CONFIRM PASSWORD
-========================= */
+// 2. Helper function to add confirm password matching to any schema
+// export function withConfirmPassword(baseSchema) {
+//   return baseSchema
+//     .extend({
+//       confirmPassword: z.string().min(1, "Confirm password is required"),
+//     })
+//     .superRefine((data, ctx) => {
+//       if (data.password !== data.confirmPassword) {
+//         ctx.addIssue({
+//           code: z.ZodIssueCode.custom,
+//           message: "Passwords do not match",
+//           path: ["confirmPassword"],
+//         });
+//       }
+//     });
+// }
+// export const passwordSchema = z
+//   .string()
+//   .min(12, "Password must be at least 12 characters.")
+//   .regex(
+//     /[!@#$%^&*(),.?":{}|<>]/,
+//     "Password must contain at least one special character."
+//   );
+
+// /* =========================
+//    PASSWORD + CONFIRM PASSWORD
+// ========================= */
 
 export const passwordWithConfirmSchema = z
   .object({

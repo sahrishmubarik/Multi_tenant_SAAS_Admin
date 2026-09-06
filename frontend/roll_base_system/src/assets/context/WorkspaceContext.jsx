@@ -21,10 +21,7 @@ export function WorkspaceProvider({ children }) {
 
   // Add newly created workspace
   function addWorkspace(workspace) {
-    setWorkspaces((previousWorkspaces) => [
-      ...previousWorkspaces,
-      workspace,
-    ]);
+    setWorkspaces((previousWorkspaces) => [...previousWorkspaces, workspace]);
 
     // Automatically select the newly created workspace
     selectWorkspace(workspace);
@@ -34,8 +31,8 @@ export function WorkspaceProvider({ children }) {
   function removeWorkspace(workspaceId) {
     setWorkspaces((previousWorkspaces) =>
       previousWorkspaces.filter(
-        (workspace) => workspace.workspaceId !== workspaceId
-      )
+        (workspace) => workspace.workspaceId !== workspaceId,
+      ),
     );
 
     // If deleted workspace was selected
@@ -68,9 +65,7 @@ export function useWorkspace() {
   const context = useContext(WorkspaceContext);
 
   if (!context) {
-    throw new Error(
-      "useWorkspace must be used inside WorkspaceProvider"
-    );
+    throw new Error("useWorkspace must be used inside WorkspaceProvider");
   }
 
   return context;
