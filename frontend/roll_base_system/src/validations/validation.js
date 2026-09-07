@@ -127,4 +127,5 @@ export const changePasswordSchema = passwordWithConfirmSchema;
 
 export const invitationSchema = z.object({
   email: emailSchema,
+   role: z.enum(["viewer", "editor", "admin"]),
 });

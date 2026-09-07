@@ -193,12 +193,11 @@ export default function LoginCard() {
         return;
       }
 
-      navigate("/dashboard");
+     
       setTimeout(() => {
-        navigate("/dashboard", {
-          replace: true,
-        });
-      }, 2000);
+        navigate("/dashboard", {replace:true});
+        setToast("");
+      }, 1000);
     } catch (error) {
       console.error("Login error:", { error });
 

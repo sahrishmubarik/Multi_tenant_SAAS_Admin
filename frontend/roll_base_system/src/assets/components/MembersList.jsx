@@ -166,9 +166,19 @@ onShowToast("Member role updated successfully!");
 
     onRoleFilterChange(role);
   }
+const currentUserId = localStorage.getItem("userId");
+
+const currentMember = members.find(
+  (member) => member.user_id === currentUserId
+);
+
+const canViewMembers =
+  currentMember?.role === "owner" ||
+  currentMember?.role === "admin";
 
   return (
     <>
+    
       <div className="mt-6 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
 
         {/* =====================================================
@@ -461,8 +471,9 @@ onShowToast("Member role updated successfully!");
                     {/* =================================================
                         DELETE
                        ================================================= */}
-
-                    <td className="px-5 py-4">
+          
+                  
+           <td className="px-5 py-4">
 
                       {member.role === "owner" ? (
 
@@ -473,8 +484,9 @@ onShowToast("Member role updated successfully!");
                       ) : (
 
                         <div className="flex justify-end gap-2">
-
-                          <button
+                        {(member.role === "owner" || member.role === "admin")&&
+                       ( 
+<button
                             type="button"
                             onClick={() =>
                               setDeleteMember(member)
@@ -496,11 +508,16 @@ onShowToast("Member role updated successfully!");
                             Delete
                           </button>
 
+                        )}
+                          
                         </div>
 
                       )}
 
                     </td>
+                        
+ 
+                    
 
                   </tr>
                 ))}
