@@ -63,7 +63,7 @@ export const workspaceMembers = pgTable(
     workspaceId: uuid("workspace_id")
       .notNull()
       .references(() => workspace.id),
-    role: roleEnum("role").notNull().default("viewer"),
+    role: roleEnum("role").notNull(),
     assignedBy: uuid("assigned_by")
       .notNull()
       .references(() => users.id),
@@ -101,7 +101,7 @@ export const invitations = pgTable(
       .references(() => workspace.id),
 
     email: varchar("email", { length: 100 }).notNull(),
-
+   role: roleEnum("role").notNull(),
     invitedBy: uuid("invited_by")
       .notNull()
       .references(() => users.id),
