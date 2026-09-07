@@ -12,7 +12,7 @@ import { sendEmailNotification } from "#services/emailService.js";
 import { createAuditLog } from "#controllers/auditLogs.js";
 
 export const createInvitation = async (req, res) => {
-  const { email } = req.body;
+  const { email , role } = req.body;
   const { workspaceId } = req.params;
   const invitedBy = req.user.id;
 
@@ -58,6 +58,7 @@ export const createInvitation = async (req, res) => {
       const [existingMember] = await db
         .select({
           id: workspaceMembers.id,
+      
         })
         .from(workspaceMembers)
         .where(
@@ -109,6 +110,7 @@ export const createInvitation = async (req, res) => {
         workspaceId,
         email,
         invitedBy,
+        role,
         token: hashedToken,
         status: "PENDING",
         expiresAt,
@@ -116,7 +118,7 @@ export const createInvitation = async (req, res) => {
       .returning();
 
     // Create email
-    const html = invitationEmail(token, existingWorkspace.workspaceName);
+    const html = invitationEmail(token, existingWorkspace.workspaceName,role);
 
     // Send email
     await sendEmailNotification(

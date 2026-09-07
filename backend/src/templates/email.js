@@ -386,7 +386,7 @@ export function verificationEmail(token) {
 // }
 
 /* Workspace invitation email */
-export function invitationEmail(token, workspaceName) {
+export function invitationEmail(token, workspaceName , role) {
   const invitationLink = `${process.env.BASE_URL}/accept-invitation/accept?token=${encodeURIComponent(token)}`;
   return `
 <!DOCTYPE html>
@@ -444,7 +444,7 @@ export function invitationEmail(token, workspaceName) {
                 "
               >
                 You have been invited to join
-                <strong>${workspaceName}</strong>.
+                <strong>${workspaceName}</strong>.as a <strong>${role}</strong>
               </p>
 
               <p
