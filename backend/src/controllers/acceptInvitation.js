@@ -8,6 +8,7 @@ export const acceptInvitation = async (req, res) => {
   const { token } = req.query;
   const userId = req.user.id;
 
+
   try {
     if (!token) {
       return res.status(400).json({
@@ -90,7 +91,7 @@ export const acceptInvitation = async (req, res) => {
       memberName: user.name,
       userId,
       workspaceId: invitation.workspaceId,
-      role: "viewer",
+      role: invitation.role,
       assignedBy: invitation.invitedBy,
     });
     // Mark invitation accepted
@@ -105,7 +106,7 @@ export const acceptInvitation = async (req, res) => {
       success: true,
       message: "Invitation accepted successfully.",
       workspaceId: invitation.workspaceId,
-      role: "viewer",
+       role: invitation.role,
     });
   } catch (error) {
     console.error("Accept Invitation Error:", { error });
