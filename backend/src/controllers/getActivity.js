@@ -1,3 +1,4 @@
+
 import { db } from "#config/client.js";
 import { auditLog, workspaceMembers } from "#drizzle/schema.js";
 import { eq, and, desc } from "drizzle-orm";
@@ -83,146 +84,146 @@ export const getActivity = async (req, res) => {
   }
 };
 
-// import { db } from "#config/client.js";
-// import {
-//   auditLog,
-//   workspaceMembers,
-// } from "#drizzle/schema.js";
-// import { eq, and, desc } from "drizzle-orm";
-// import { paginateQuery } from '../utils/pagination.js'; // Ensure correct extension (.js)
+// // import { db } from "#config/client.js";
+// // import {
+// //   auditLog,
+// //   workspaceMembers,
+// // } from "#drizzle/schema.js";
+// // import { eq, and, desc } from "drizzle-orm";
+// // import { paginateQuery } from '../utils/pagination.js'; // Ensure correct extension (.js)
 
-// export const getActivity = async (req, res) => {
-//   const { workspaceId } = req.params;
-//   const userId = req.user.id;
+// // export const getActivity = async (req, res) => {
+// //   const { workspaceId } = req.params;
+// //   const userId = req.user.id;
 
-//   // 1. EXTRACT query variables from the incoming HTTP request
-//   const { page, limit } = req.query;
-// // Make sure you send them unchanged directly to the helper
-// try{
-//     if (!workspaceId) {
-//       return res.status(400).json({
-//         message: "Workspace ID is required",
-//       });
-//     }
+// //   // 1. EXTRACT query variables from the incoming HTTP request
+// //   const { page, limit } = req.query;
+// // // Make sure you send them unchanged directly to the helper
+// // try{
+// //     if (!workspaceId) {
+// //       return res.status(400).json({
+// //         message: "Workspace ID is required",
+// //       });
+// //     }
 
-//     // Get current user's membership
-//     const [member] = await db
-//       .select({
-//         role: workspaceMembers.role,
-//       })
-//       .from(workspaceMembers)
-//       .where(
-//         and(
-//           eq(workspaceMembers.workspaceId, workspaceId),
-//           eq(workspaceMembers.userId, userId)
-//         )
-//       );
+// //     // Get current user's membership
+// //     const [member] = await db
+// //       .select({
+// //         role: workspaceMembers.role,
+// //       })
+// //       .from(workspaceMembers)
+// //       .where(
+// //         and(
+// //           eq(workspaceMembers.workspaceId, workspaceId),
+// //           eq(workspaceMembers.userId, userId)
+// //         )
+// //       );
 
-//     if (!member) {
-//       return res.status(403).json({
-//         message: "You are not a member of this workspace",
-//       });
-//     }
+// //     if (!member) {
+// //       return res.status(403).json({
+// //         message: "You are not a member of this workspace",
+// //       });
+// //     }
 
-//     // TODO:
-//     // owner/admin -> all workspace activity
-//     // editor/viewer -> only their own activity
+// //     // TODO:
+// //     // owner/admin -> all workspace activity
+// //     // editor/viewer -> only their own activity
 
-//     // 2. CONVERT to a dynamic query statement using .$dynamic()
-//     const query = db
-//       .select({
-//         id: auditLog.id,
-//         performedBy: auditLog.performedBy,
-//         action: auditLog.action,
-//         affectedUser: auditLog.affectedUser,
-//         message: auditLog.message,
-//         createdAt: auditLog.createdAt,
-//       })
-//       .from(auditLog)
-//       // Tip: You will likely want to filter logs by workspace here using .where(eq(auditLog.workspaceId, workspaceId))
-//       .orderBy(desc(auditLog.createdAt))
-//       .$dynamic();
+// //     // 2. CONVERT to a dynamic query statement using .$dynamic()
+// //     const query = db
+// //       .select({
+// //         id: auditLog.id,
+// //         performedBy: auditLog.performedBy,
+// //         action: auditLog.action,
+// //         affectedUser: auditLog.affectedUser,
+// //         message: auditLog.message,
+// //         createdAt: auditLog.createdAt,
+// //       })
+// //       .from(auditLog)
+// //       // Tip: You will likely want to filter logs by workspace here using .where(eq(auditLog.workspaceId, workspaceId))
+// //       .orderBy(desc(auditLog.createdAt))
+// //       .$dynamic();
 
-//     // 3. EXECUTE dynamic query wrapper via your reusable utils engine
-//     const paginationResult = await paginateQuery(query, { page, limit });
+// //     // 3. EXECUTE dynamic query wrapper via your reusable utils engine
+// //     const paginationResult = await paginateQuery(query, { page, limit });
 
-//     // 4. RETURN responses back matching your frontend's payload expectations
-//     return res.status(200).json({
-//       activities: paginationResult.data, // This limits records to exactly 10!
-//       meta: paginationResult.meta,       // Sends metadata to the frontend UI
-//     });
+// //     // 4. RETURN responses back matching your frontend's payload expectations
+// //     return res.status(200).json({
+// //       activities: paginationResult.data, // This limits records to exactly 10!
+// //       meta: paginationResult.meta,       // Sends metadata to the frontend UI
+// //     });
 
-//   } catch (error) {
-//     console.error("Get activity error:", error);
+// //   } catch (error) {
+// //     console.error("Get activity error:", error);
 
-//     return res.status(500).json({
-//       message: "Failed to fetch activity",
-//     });
-//   }
-// };
+// //     return res.status(500).json({
+// //       message: "Failed to fetch activity",
+// //     });
+// //   }
+// // };
 
-// import { db } from "#config/client.js";
-// import {
-//   auditLog,
-//   workspaceMembers,
-// } from "#drizzle/schema.js";
-// import { eq, and, desc } from "drizzle-orm";
-// import { paginateQuery } from '../utils/pagination';
-// export const getActivity = async (req, res) => {
-//   const { workspaceId } = req.params;
-//   const userId = req.user.id;
+// // import { db } from "#config/client.js";
+// // import {
+// //   auditLog,
+// //   workspaceMembers,
+// // } from "#drizzle/schema.js";
+// // import { eq, and, desc } from "drizzle-orm";
+// // import { paginateQuery } from '../utils/pagination';
+// // export const getActivity = async (req, res) => {
+// //   const { workspaceId } = req.params;
+// //   const userId = req.user.id;
 
-//   try {
-//     if (!workspaceId) {
-//       return res.status(400).json({
-//         message: "Workspace ID is required",
-//       });
-//     }
+// //   try {
+// //     if (!workspaceId) {
+// //       return res.status(400).json({
+// //         message: "Workspace ID is required",
+// //       });
+// //     }
 
-//     // Get current user's membership
-//     const [member] = await db
-//       .select({
-//         role: workspaceMembers.role,
-//       })
-//       .from(workspaceMembers)
-//       .where(
-//         and(
-//           eq(workspaceMembers.workspaceId, workspaceId),
-//           eq(workspaceMembers.userId, userId)
-//         )
-//       );
+// //     // Get current user's membership
+// //     const [member] = await db
+// //       .select({
+// //         role: workspaceMembers.role,
+// //       })
+// //       .from(workspaceMembers)
+// //       .where(
+// //         and(
+// //           eq(workspaceMembers.workspaceId, workspaceId),
+// //           eq(workspaceMembers.userId, userId)
+// //         )
+// //       );
 
-//     if (!member) {
-//       return res.status(403).json({
-//         message: "You are not a member of this workspace",
-//       });
-//     }
+// //     if (!member) {
+// //       return res.status(403).json({
+// //         message: "You are not a member of this workspace",
+// //       });
+// //     }
 
-//     // TODO:
-//     // owner/admin -> all workspace activity
-//     // editor/viewer -> only their own activity
+// //     // TODO:
+// //     // owner/admin -> all workspace activity
+// //     // editor/viewer -> only their own activity
 
-//     // For now:
-//     const activities = await db
-//       .select({
-//         id: auditLog.id,
-//         performedBy: auditLog.performedBy,
-//         action: auditLog.action,
-//         affectedUser: auditLog.affectedUser,
-//         message: auditLog.message,
-//         createdAt: auditLog.createdAt,
-//       })
-//       .from(auditLog)
-//       .orderBy(desc(auditLog.createdAt));
+// //     // For now:
+// //     const activities = await db
+// //       .select({
+// //         id: auditLog.id,
+// //         performedBy: auditLog.performedBy,
+// //         action: auditLog.action,
+// //         affectedUser: auditLog.affectedUser,
+// //         message: auditLog.message,
+// //         createdAt: auditLog.createdAt,
+// //       })
+// //       .from(auditLog)
+// //       .orderBy(desc(auditLog.createdAt));
 
-//     return res.status(200).json({
-//       activities,
-//     });
-//   } catch (error) {
-//     console.error("Get activity error:", error);
+// //     return res.status(200).json({
+// //       activities,
+// //     });
+// //   } catch (error) {
+// //     console.error("Get activity error:", error);
 
-//     return res.status(500).json({
-//       message: "Failed to fetch activity",
-//     });
-//   }
-// };
+// //     return res.status(500).json({
+// //       message: "Failed to fetch activity",
+// //     });
+// //   }
+// // };
