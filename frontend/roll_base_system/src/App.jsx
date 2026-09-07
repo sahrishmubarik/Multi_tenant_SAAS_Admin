@@ -16,6 +16,7 @@ import Members from "./pages/Members.jsx";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import Activity from "./pages/Activity.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
+
 function App() {
   return (
     <BrowserRouter>
@@ -29,11 +30,12 @@ function App() {
         {/* Dashboard */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}>
           <Route index element={<DashboardHome />} />
-          {/* <Route index element={<Profile />} /> */}
+          <Route index element={<Profile />} />
 
           <Route path="profile" element={<Profile />} />
 
           <Route path="workspace" element={<MyWorkspace />} />
+
 
            <Route path="members" element={<Members/>} />
 

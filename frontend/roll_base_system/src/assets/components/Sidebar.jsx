@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, replace, useNavigate } from "react-router-dom";
+import { NavLink, replace, useNavigate , useLocation } from "react-router-dom";
 import { useWorkspace } from "../context/WorkspaceContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,6 +14,7 @@ import {
 
 export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { workspaces, setWorkspaces, selectedWorkspace, selectWorkspace } =
     useWorkspace();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
@@ -26,6 +27,10 @@ export default function Sidebar({ isOpen, onClose }) {
     navigate("/login", { replace: true });
   };
 
+  // current user role get 
+  const canAccessMembers =
+  selectedWorkspace?.role === "owner" ||
+  selectedWorkspace?.role === "admin";
   /* get user workspace */
 
   useEffect(() => {
@@ -313,15 +318,43 @@ export default function Sidebar({ isOpen, onClose }) {
           <NavLink to="/dashboard" className={navLinkClass}>
             Dashboard
           </NavLink>
-          <NavLink to="/dashboard/workspace" className={navLinkClass}>
+          {/* <NavLink to="/dashboard/workspace" className={navLinkClass}>
             <FontAwesomeIcon icon={faBuilding} className="w-4 text-[12px]" />
             Workspace
-          </NavLink>
+          </NavLink> */}
+          <button
+  type="button"
+  onClick={() => {
+    if (workspaceLoading) {
+      return;
+    }
 
-          <NavLink to="/dashboard/members" className={navLinkClass}>
+    if (workspaces.length === 0) {
+      navigate("/dashboard/create-workspace");
+    } else {
+      navigate("/dashboard/workspace");
+    }
+  }}
+  className={navLinkClass({
+    isActive:
+      location.pathname === "/dashboard/workspace" ||
+      location.pathname === "/dashboard/create-workspace",
+  })}
+>
+  <FontAwesomeIcon icon={faBuilding} className="w-4 text-[12px]" />
+  Workspace
+</button>
+          {/* <NavLink to="/dashboard/members" className={navLinkClass}>
             <FontAwesomeIcon icon={faUsers} className="w-4 text-[12px]" />
             Members
-          </NavLink>
+          </NavLink> */}
+          {canAccessMembers && (
+  <NavLink to="/dashboard/members" className={navLinkClass}>
+    <FontAwesomeIcon icon={faUsers} className="w-4 text-[12px]" />
+    Members
+  </NavLink>
+)}
+
           <NavLink to="/dashboard/profile" className={navLinkClass}>
             <FontAwesomeIcon icon={faUser} className="w-4 text-[12px]" />
             Profile
