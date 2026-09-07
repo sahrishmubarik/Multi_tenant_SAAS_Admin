@@ -1,7 +1,7 @@
 import formData from "form-data";
 import Mailgun from "mailgun.js";
 import { db } from "#config/client.js";
-import { users } from "#drizzle/schema.js";
+import { users } from "#db/schema/index.js";
 import { eq } from "drizzle-orm";
 import { generateSecureToken, hashToken } from "#utils/cryptoUtils.js"; // Utils se import
 import { resetPasswordEmail, verificationEmail } from "#templates/email.js";

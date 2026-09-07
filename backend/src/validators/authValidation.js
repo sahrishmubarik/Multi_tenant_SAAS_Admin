@@ -1,6 +1,4 @@
 import { z } from "zod";
-import pkg from "pg/lib/defaults";
-const { password } = pkg;
 
 // 1. Shared constants and base validators
 export const passwordRegex =
@@ -20,7 +18,7 @@ export const passwordSchema = z
     "At least one uppercase letter, one lowercase, one number, one special character (@$!%*?&) required",
   );
 
-// 2. Helper function to add confirm password matching to any schema
+// 2. Helper: add confirm-password matching to any schema
 export function withConfirmPassword(baseSchema) {
   return baseSchema
     .extend({
@@ -37,8 +35,7 @@ export function withConfirmPassword(baseSchema) {
     });
 }
 
-// 3. Implementation of specific validations
-
+// 3. Auth validations
 export const loginValidation = z.object({
   email: emailSchema,
   password: passwordSchema,
@@ -65,18 +62,7 @@ export const changePasswordValidation = withConfirmPassword(
     password: passwordSchema,
   }),
 );
+
 export const verifiedEmailValidation = z.object({
   email: emailSchema,
-});
-
-export const workspaceNameValidation = z.object({
-  workspaceName: z
-    .string({ required_error: "Workspace name is required" })
-    .trim() // Removes leading and trailing accidental spaces
-    .min(3, "Minimum length must be at least 3 characters")
-    .max(50, "Workspace name cannot exceed 50 characters")
-    .regex(
-      /^[A-Za-z0-9']+(?: [A-Za-z0-9']+)*$/,
-      "Workspace name can only contain alphanumeric characters with single spaces between words",
-    ), // Completely blocks empty strings, multiple consecutive spaces, or special characters
 });
