@@ -79,6 +79,7 @@ export default function PendingInvitations({
   workspaceId,
   invitationRefresh,
   onShowToast,
+
 }) {
   const [invitations, setInvitations] = useState([]);
 
@@ -95,57 +96,131 @@ export default function PendingInvitations({
    */
   const [selectedInvitation, setSelectedInvitation] = useState(null);
 
+  // 1. DYNAMIC PAGINATION AND RECORD LIMIT STATES
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [limit, setLimit] = useState(10); // Managed as a state variable now
+
   /* =====================================================
      FETCH INVITATIONS
      ===================================================== */
 
-  const fetchInvitations = async () => {
-    if (!workspaceId) {
-      setError("No workspace selected.");
+  // const fetchInvitations = async () => {
+  //   if (!workspaceId) {
+  //     setError("No workspace selected.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     setLoading(true);
+  //     setError("");
+
+  //     const authToken = localStorage.getItem("token");
+
+  //     if (!authToken) {
+  //       setError("Authorization token is required.");
+  //       setLoading(false);
+  //       return;
+  //     }
+  //     const response = await fetch(
+  //        `/api/v1/workspace-invitation/status/${workspaceId}?status=${status}&page=${page}&limit=${limit}`,
+  //       // `/api/v1/workspace-invitation/status/${workspaceId}?status=${status}`,
+  //       {
+  //         method: "GET",
+  //         headers: {
+  //           Authorization: `Bearer ${authToken}`,
+  //         },
+  //       },
+  //     );
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.message || "Failed to fetch invitations");
+  //     }
+
+  //     console.log("Invitation API response:", data);
+
+  //     setInvitations(data.invitations || []);
+
+  // //  const resData = await response.json();
+
+  // //     if (!response.ok) {
+  // //       throw new Error(resData.message || "Failed to fetch activities");
+  // //     }
+
+  //     const activityData = data.data || data.activities || [];
+  //     setInvitations(activityData);
+
+  //     if (data.meta) {
+  //       setHasMore(data.meta.count === Number(limit));
+  //     } else {
+  //       setHasMore(data.length === Number(limit));
+  //     }
+
+  //   } catch (error) {
+  //     console.error("Invitation status error:", error);
+
+  //     setError(error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+const fetchInvitations = async () => {
+  if (!workspaceId) {
+    setError("No workspace selected.");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError("");
+
+    const authToken = localStorage.getItem("token");
+
+    if (!authToken) {
+      setError("Authorization token is required.");
       setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      setError("");
-
-      const authToken = localStorage.getItem("token");
-
-      if (!authToken) {
-        setError("Authorization token is required.");
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(
-        `/api/v1/workspace-invitation/status/${workspaceId}?status=${status}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
+    const response = await fetch(
+      `/api/v1/workspace-invitation/status/${workspaceId}?status=${status}&page=${page}&limit=${limit}`,
+      // `/api/v1/workspace-invitation/status/${workspaceId}?status=${status}&page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
         },
-      );
+      },
+    );
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch invitations");
-      }
-
-      console.log("Invitation API response:", data);
-
-      setInvitations(data.invitations || []);
-    } catch (error) {
-      console.error("Invitation status error:", error);
-
-      setError(error.message);
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch invitations");
     }
-  };
 
+    console.log("Invitation API response:", data);
+
+    // Store the invitations returned by the backend
+    setInvitations(data.invitations || []);
+
+    // Backend pagination information
+    if (data.meta) {
+      setHasMore(data.meta.count === Number(limit));
+    } else {
+      setHasMore(false);
+    }
+  } catch (error) {
+    console.error("Invitation status error:", error);
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
   /* =====================================================
      REVOKE INVITATION
      ===================================================== */
@@ -217,7 +292,7 @@ export default function PendingInvitations({
 
   useEffect(() => {
     fetchInvitations();
-  }, [workspaceId, status, invitationRefresh]);
+  }, [workspaceId, status, invitationRefresh, page,limit]);
 
   /* =====================================================
      TITLE
@@ -267,8 +342,26 @@ export default function PendingInvitations({
     return "No revoked invitations.";
   };
 
+/* get current member role */
+// const currentUserId = localStorage.getItem("userId");
+
+// const currentMember = members.find(
+//   (member) => member.user_id === currentUserId
+// );
+
+// const canViewMembers =
+//   currentMember?.role === "owner" ||
+//   currentMember?.role === "admin";
+
+  // Helper function to update items per page and return to page 1
+  const handleLimitChange = (e) => {
+    setLimit(Number(e.target.value));
+    setPage(1); // Jump back to the start so you don't break data boundary offsets
+  };
+
   return (
     <>
+      
       <div className="mt-6 overflow-hidden rounded-[18px] border border-[#dededc] bg-white container-shadow">
         {/* =================================================
             HEADER
@@ -285,7 +378,26 @@ export default function PendingInvitations({
                 {getDescription()}
               </p>
             </div>
-
+           {/* Dynamic Records Limit Selector Box */}
+            <div className="flex items-center space-x-2">
+              <label
+                htmlFor="limit"
+                className="text-[12px] font-medium text-[#66686d]"
+              >
+                Show:
+              </label>
+              <select
+                id="limit"
+                value={limit}
+                onChange={handleLimitChange}
+                className="cursor-pointer rounded-[8px] border border-[#dededc] bg-white px-2 py-1 text-[13px] font-medium text-[#17181a] shadow-sm focus:border-[#66686d] focus:outline-none hover:cursor-pointer"
+              >
+                <option value={5}>5 records</option>
+                <option value={10}>10 records</option>
+                <option value={20}>20 records</option>
+                <option value={50}>50 records</option>
+              </select>
+            </div>
             {/* STATUS DROPDOWN */}
             <div>
               <label htmlFor="invitation-status" className="sr-only">
@@ -424,7 +536,37 @@ export default function PendingInvitations({
             </div>
           )}
         </div>
+         {/* Pagination Controls */}
+            {!error && invitations.length > 0 && (
+              <div className="mt-6 flex items-center justify-between border-t border-[#e7e7e5] pt-4 mb-5 px-5" >
+                <button
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={page === 1 || loading}
+                  className="btn-page "
+                  // className="rounded-[8px] border border-[#dededc] px-4 py-2 text-[13px] font-medium text-[#17181a] bg-white transition hover:bg-[#f4f7f4] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+
+                <span className="text-[13px] text-[#66686d] font-medium">
+                  Page {page}
+                </span>
+
+                <button
+                  onClick={() => setPage((prev) => prev + 1)}
+                  disabled={!hasMore || loading}
+                  className="btn-page"
+                  // className="rounded-[8px] border border-[#dededc] px-4 py-2 text-[13px] font-medium text-[#17181a] bg-white transition hover:bg-[#f4f7f4] disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer hover:border-[var(--color-primary-hover)]"
+                >
+                  Next
+                </button>
+              </div>
+            )}
       </div>
+
+      
+    
+
 
       {/* =====================================================
           REVOKE CONFIRMATION MODAL

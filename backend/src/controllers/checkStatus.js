@@ -1,9 +1,11 @@
 import { db } from "#config/client.js";
 import { invitations } from "#drizzle/schema.js";
 import { eq, and } from "drizzle-orm";
+import { paginateQuery } from "../utils/pagination.js";
+
 export async function checkInvitationStatus(req, res) {
   const { workspaceId } = req.params;
-  const { status: rawStatus } = req.query;
+  const { status: rawStatus, page, limit } = req.query;
 
   const status = rawStatus?.toUpperCase();
 
@@ -21,14 +23,15 @@ export async function checkInvitationStatus(req, res) {
     }
 
     const allowedStatus = ["PENDING", "ACCEPTED", "REVOKED"];
-    console.log(status);
+
     if (!allowedStatus.includes(status)) {
       return res.status(400).json({
         message: `Invalid status. You can only choose from: ${allowedStatus.join(", ")}`,
       });
     }
 
-    const checkStatus = await db
+    // Build query
+    const query = db
       .select({
         id: invitations.id,
         workspaceId: invitations.workspaceId,
@@ -39,14 +42,25 @@ export async function checkInvitationStatus(req, res) {
       .where(
         and(
           eq(invitations.workspaceId, workspaceId),
-          eq(invitations.status, status),
-        ),
-      );
-    console.log(checkStatus);
+          eq(invitations.status, status)
+        )
+      )
+      .$dynamic();
+
+    // Apply pagination
+    const paginationResult = await paginateQuery(query, {
+      page,
+      limit,
+    });
+
+    console.log(paginationResult.data);
+
     return res.status(200).json({
       message: "Status fetched successfully",
-      count: checkStatus.length,
-      invitations: checkStatus,
+
+      invitations: paginationResult.data,
+
+      meta: paginationResult.meta,
     });
   } catch (error) {
     console.log("Don't fetch invitation status:", error);
@@ -57,3 +71,65 @@ export async function checkInvitationStatus(req, res) {
     });
   }
 }
+
+
+
+// import { db } from "#config/client.js";
+// import { invitations } from "#drizzle/schema.js";
+// import { eq, and } from "drizzle-orm";
+// export async function checkInvitationStatus(req, res) {
+//   const { workspaceId } = req.params;
+//   const { status: rawStatus } = req.query;
+
+//   const status = rawStatus?.toUpperCase();
+
+//   try {
+//     if (!workspaceId) {
+//       return res.status(400).json({
+//         message: "Workspace ID is required",
+//       });
+//     }
+
+//     if (!status) {
+//       return res.status(400).json({
+//         message: "Status field is required",
+//       });
+//     }
+
+//     const allowedStatus = ["PENDING", "ACCEPTED", "REVOKED"];
+//     console.log(status);
+//     if (!allowedStatus.includes(status)) {
+//       return res.status(400).json({
+//         message: `Invalid status. You can only choose from: ${allowedStatus.join(", ")}`,
+//       });
+//     }
+
+//     const checkStatus = await db
+//       .select({
+//         id: invitations.id,
+//         workspaceId: invitations.workspaceId,
+//         email: invitations.email,
+//         status: invitations.status,
+//       })
+//       .from(invitations)
+//       .where(
+//         and(
+//           eq(invitations.workspaceId, workspaceId),
+//           eq(invitations.status, status),
+//         ),
+//       );
+//     console.log(checkStatus);
+//     return res.status(200).json({
+//       message: "Status fetched successfully",
+//       count: checkStatus.length,
+//       invitations: checkStatus,
+//     });
+//   } catch (error) {
+//     console.log("Don't fetch invitation status:", error);
+
+//     return res.status(500).json({
+//       message: "Failed to fetch invitation status.",
+//       error: error.message,
+//     });
+//   }
+// }
