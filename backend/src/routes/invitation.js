@@ -1,39 +1,30 @@
 import express from "express";
-import {getInvitationDetails } from "#controllers/checkInvitation.js";
 
-import { ownerOrAdminMiddleware } from "#middleware/ownerOrAdmin.js";
-import { ownerMiddleware } from "#middleware/owner.js";
-import { authMiddleware } from "#middleware/auth.js";
-
-import { createInvitation } from "#controllers/invitation.js";
+import { authMiddleware } from "#middlewares/auth.js";
+import { ownerOrAdminMiddleware } from "#middlewares/ownerOrAdmin.js";
 import {
+  getInvitationDetails,
   acceptInvitation,
   revokeInvitation,
-} from "#controllers/acceptInvitation.js";
-
-import { checkInvitationStatus } from "#controllers/checkStatus.js";
+  createInvitation,
+  checkInvitationStatus,
+} from "#controllers/invitationController.js";
 
 const invitation = express.Router();
 
+// Public: fetch invitation details by token
+invitation.get("/details", getInvitationDetails);
 
+// Logged-in user: accept an invitation
+invitation.post("/accept", authMiddleware, acceptInvitation);
 
+// Owner/Admin: revoke an invitation
+invitation.post("/revoke", authMiddleware, ownerOrAdminMiddleware, revokeInvitation);
 
+// Owner/Admin: create an invitation
+invitation.post("/:workspaceId", authMiddleware, ownerOrAdminMiddleware, createInvitation);
 
-
-invitation.get("/details",getInvitationDetails);
-
-
-// LOGGED-IN USER
-// User invitation accept 
-invitation.post("/accept", authMiddleware,acceptInvitation);
-
-
-// Admin/Owner
-invitation.post( "/revoke", authMiddleware,ownerOrAdminMiddleware,revokeInvitation);
-// Admin/Owner
-invitation.post( "/:workspaceId", authMiddleware,ownerOrAdminMiddleware, createInvitation);
-
-// Owner
-invitation.get( "/status/:workspaceId",authMiddleware, ownerOrAdminMiddleware, checkInvitationStatus);
+// Owner/Admin: list invitations by status
+invitation.get("/status/:workspaceId", authMiddleware, ownerOrAdminMiddleware, checkInvitationStatus);
 
 export default invitation;

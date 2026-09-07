@@ -6,22 +6,23 @@
   "type": "module",
   "scripts": {
     "db:generate": "drizzle-kit generate --config=drizzle.config.js",
-    "db:migrate": "node src/drizzle/migrate.js",
+    "db:migrate": "node src/db/migrate.js",
     "studio": "drizzle-kit studio",
     "start": "node src/server.js",
     "dev": "node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "imports": {
-    "#drizzle/*": "./src/drizzle/*",
+    "#db/*": "./src/db/*",
     "#controllers/*": "./src/controllers/*",
     "#routes/*": "./src/routes/*",
     "#config/*": "./src/config/*",
     "#services/*": "./src/services/*",
+    "#repositories/*": "./src/repositories/*",
     "#utils/*": "./src/utils/*",
     "#validators/*": "./src/validators/*",
     "#templates/*": "./src/templates/*",
-    "#middleware/*": "./src/middleware/*"
+    "#middlewares/*": "./src/middlewares/*"
   },
   "keywords": [],
   "author": "",
