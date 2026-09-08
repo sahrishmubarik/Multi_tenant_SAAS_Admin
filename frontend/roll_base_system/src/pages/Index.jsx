@@ -1,8 +1,8 @@
-import Header from "../assets/components/Header";
+import Header from "../components/Header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShieldHalved, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import { faBuilding } from "@fortawesome/free-regular-svg-icons";
-import Footer from "../assets/components/Footer";
+import Footer from "../components/Footer";
 
 export default function Index() {
   return (

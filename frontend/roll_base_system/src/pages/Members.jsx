@@ -9,9 +9,9 @@
 // //  import PendingInvitations from "../assets/components/PendingInvitations.jsx";
 
 import { useEffect, useState } from "react";
-import MembersList from "../assets/components/MembersList.jsx";
-import InviteMemberCard from "../assets/components/InviteMemberCard.jsx";
-import PendingInvitations from "../assets/components/PendingInvitations.jsx";
+import MembersList from "../components/MembersList.jsx";
+import InviteMemberCard from "../components/InviteMemberCard.jsx";
+import PendingInvitations from "../components/PendingInvitations.jsx";
 
 export default function Members() {
   const [members, setMembers] = useState([]);

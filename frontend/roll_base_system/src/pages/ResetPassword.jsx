@@ -3,7 +3,7 @@ import { useState } from "react";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import AuthHeader from "../assets/components/AuthHeader";
+import AuthHeader from "../components/AuthHeader";
 import { passwordSchema, resetPasswordSchema } from "../validations/validation";
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import AuthHeader from "../assets/components/AuthHeader";
+import AuthHeader from "../components/AuthHeader";
 import { useNavigate } from "react-router-dom";
 import { nameSchema } from "../validations/validation.js";
-import { useWorkspace } from "../assets/context/WorkspaceContext";
+import { useWorkspace } from "../context/WorkspaceContext";
 export default function CreateWorkspace() {
   const { addWorkspace } = useWorkspace();
   const [formData, setFormData] = useState({

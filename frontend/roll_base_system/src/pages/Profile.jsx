@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import PasswordCard from "../assets/components/PassWordCard";
+import PasswordCard from "../components/PassWordCard";
 import { useState, useEffect } from "react";
 export default function Profile() {
   const navigate = useNavigate();

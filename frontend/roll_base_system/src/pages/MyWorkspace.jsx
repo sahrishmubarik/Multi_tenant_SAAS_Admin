@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useWorkspace } from "../assets/context/WorkspaceContext";
+import { useWorkspace } from "../context/WorkspaceContext";
 import { workspaceNameSchema } from "../validations/validation.js";
 import { replace, useNavigate } from "react-router-dom";
 

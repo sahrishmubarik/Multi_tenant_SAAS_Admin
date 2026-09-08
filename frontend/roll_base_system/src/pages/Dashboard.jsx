@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 
-import Sidebar from "../assets/components/Sidebar";
+import Sidebar from "../components/Sidebar";
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
