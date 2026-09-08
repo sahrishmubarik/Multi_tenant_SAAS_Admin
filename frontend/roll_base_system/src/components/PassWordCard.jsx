@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   passwordSchema,
   changePasswordSchema,
-} from "../../validations/validation.js";
+} from "../validations/validation.js";
 
 export default function PasswordCard() {
   /* =========================

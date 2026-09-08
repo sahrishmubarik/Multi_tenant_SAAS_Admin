@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { emailSchema, invitationSchema } from "../../validations/validation.js";
+import { emailSchema, invitationSchema } from "../validations/validation.js";
 
 export default function InviteMemberCard({
   workspaceId,

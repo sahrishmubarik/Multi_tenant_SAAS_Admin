@@ -8,7 +8,7 @@ import {
   emailSchema,
   passwordSchema,
   signupSchema,
-} from "../../validations/validation.js";
+} from "../validations/validation.js";
 
 export default function SignupCard() {
   const defaultFormValue = {

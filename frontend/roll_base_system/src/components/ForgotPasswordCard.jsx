@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { forgotPasswordSchema } from "../../validations/validation.js";
+import { forgotPasswordSchema } from "../validations/validation.js";
 
 export default function ForgotPasswordCard() {
   const navigate = useNavigate();

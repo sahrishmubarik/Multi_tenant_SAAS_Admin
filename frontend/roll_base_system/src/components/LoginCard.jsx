@@ -8,7 +8,7 @@ import {
   passwordSchema,
   loginSchema,
   // forgotPasswordSchema,
-} from "../../validations/validation.js";
+} from "../validations/validation.js";
 
 export default function LoginCard() {
   const [formData, setFormData] = useState({
