@@ -4,7 +4,7 @@ import "./App.css";
 import Index from "./pages/Index.jsx";
 import Signup from "./pages/Signup.jsx";
 import Login from "./pages/Login.jsx";
-import  ProtectedRoute  from "./assets/components/ProtectedRoute.jsx"
+import  ProtectedRoute  from "./components/ProtectedRoute.jsx"
 import Dashboard from "./pages/Dashboard.jsx";
 import DashboardHome from "./pages/DashboardHome.jsx";
  import VerifyEmail from "./pages/VerifyEmail.jsx";
