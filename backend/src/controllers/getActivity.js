@@ -44,12 +44,19 @@ export const getActivity = async (req, res) => {
         affectedUser: auditLog.affectedUser,
         message: auditLog.message,
         createdAt: auditLog.createdAt,
-      })
-      .from(auditLog)
+      }).from(auditLog)
       .leftJoin(
-        workspaceMembers,
-        eq(auditLog.performedBy, workspaceMembers.userId), // Matches log performer to their workspace context [1]
-      );
+  workspaceMembers,
+  and(
+    eq(auditLog.performedBy, workspaceMembers.userId),
+    eq(workspaceMembers.workspaceId, workspaceId),
+  ),
+);
+      // .from(auditLog)
+      // .leftJoin(
+      //   workspaceMembers,
+      //   eq(auditLog.performedBy, workspaceMembers.userId), // Matches log performer to their workspace context [1]
+      // );
 
     // 3. APPLY FILTERING BASED ON CURRENT ROLE
     if (member.role === "owner" || member.role === "admin") {
