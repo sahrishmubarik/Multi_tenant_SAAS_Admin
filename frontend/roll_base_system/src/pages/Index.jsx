@@ -3,8 +3,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShieldHalved, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import { faBuilding } from "@fortawesome/free-regular-svg-icons";
 import Footer from "../components/Footer";
-
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 export default function Index() {
+   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const isAuthenticated = !!localStorage.getItem('token');
+
+    if (isAuthenticated) {
+      // Redirect to dashboard, 'replace: true' prevents them from clicking "back" to the index
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
   return (
     <>
       <Header />
